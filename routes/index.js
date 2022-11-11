@@ -7,5 +7,14 @@ router.get('/', function(req, res) {
 
 })
 
+router.get('/login', function(req, res) {
+    res.render('login')
+
+})
+
+router.get('/reference', function(req, res) {
+    res.render('reference')
+
+})
 
 module.exports = router;

@@ -43,6 +43,7 @@ app.use(cookieParser());
 //setting view engine
 app.set("view engine", "pug")
 app.set('views', path.join(__dirname, 'views'))
+    //app.set('views', path.join(__dirname, 'views/patient'))
 
 //loading assets
 app.use("/css", express.static(path.resolve(__dirname, "public/css")))
@@ -51,6 +52,9 @@ app.use("/js", express.static(path.resolve(__dirname, "public/js")))
 
 //loading routers
 app.use('/', require('./routes/index'));
+app.use('/patient', require('./routes/patient'));
+app.use('/physician', require('./routes/physician'));
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
