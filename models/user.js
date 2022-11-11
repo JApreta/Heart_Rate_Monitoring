@@ -3,22 +3,22 @@ const mongoose = require('mongoose')
 const UserSchema = new mongoose.Schema({
     firstName: {
         type: String,
-        required: true,
+        required: true
     },
     lastName: {
         type: String,
-        required: true,
+        required: true
     },
-    username: {
+    email: {
         type: String,
-        required: true,
+        required: true
     },
     password: {
         type: String,
-        required: true,
+        required: true
     },
     particle_token: {
-        type: String,
+        type: String
     },
     userType: {
         type: String,

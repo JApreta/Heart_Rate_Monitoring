@@ -8,6 +8,7 @@ const morgan = require('morgan')
 const pug = require('pug')
 const https = require('https')
 const fs = require('fs')
+const bcrypt = required('bcrypt')
 
 dotenv.config({ path: './config/config.env' }) //load config file
 
