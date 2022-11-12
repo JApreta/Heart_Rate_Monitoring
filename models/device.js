@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const UserSchema = new mongoose.Schema({
+const DeviceSchema = new mongoose.Schema({
     device_id: {
         type: String,
         required: true
@@ -11,4 +11,4 @@ const UserSchema = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Device', UserSchema)
+module.exports = mongoose.model('Device', DeviceSchema)
