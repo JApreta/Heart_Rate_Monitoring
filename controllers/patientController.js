@@ -79,7 +79,7 @@ exports.create = asyncHandler(async(req, res) => {
                         let msgStr = `patient with email(${data.email}) info has been save`;
                         res.status(201).json({
                             message: msgStr,
-                            token: generateToken(data.email)
+                            token: generateToken(data.email, data.userType)
                         });
                     }
                 })
@@ -101,7 +101,7 @@ exports.login = asyncHandler(async(req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
         res.json({
             email: user.email,
-            token: generateToken(user.email),
+            token: generateToken(user.email, user.userType),
         })
     } else {
         res.status(400)
@@ -111,7 +111,9 @@ exports.login = asyncHandler(async(req, res) => {
 exports.dashboard = asyncHandler(async(req, res) => {
     res.status(200).send({ message: req.user })
 })
-const generateToken = (email) => {
-    return jwt.sign({ email },
+const generateToken = (email, userType) => {
+    return jwt.sign({
+            email: email
+        },
         secret, { expiresIn: '90d' })
 }

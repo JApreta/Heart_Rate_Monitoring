@@ -74,8 +74,8 @@ app.use(function(err, req, res, next) {
 });
 
 const sslServer = https.createServer({
-        key: fs.readFileSync(path.join(__dirname, 'certificate', 'key.pem')),
-        cert: fs.readFileSync(path.join(__dirname, 'certificate', 'cert.pem'))
-    }, app)
-    //sslServer.listen(PORT), () => { console.log('server running') };
-app.listen(PORT), () => { console.log('server running') };
+    key: fs.readFileSync(path.join(__dirname, 'certificate', 'key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, 'certificate', 'cert.pem'))
+}, app)
+sslServer.listen(PORT), () => { console.log('server running') };
+//app.listen(PORT), () => { console.log('server running') };

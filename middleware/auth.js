@@ -15,13 +15,19 @@ exports.protect = asyncHandler(async(req, res, next) => {
             token = req.headers.authorization.split(' ')[1]
 
             // Verify token
-            const decoded = jwt.verify(token, secret)
+            decoded = jwt.verify(token, secret)
 
             // Get user from the token
-            req.user = await User.findOne({ decoded }).select('-password')
-                //req.user = await User.findById(decoded.id).select('-password')
+
+            req.user = await User.findOne({ "email": decoded.email }).select('-password')
+
+            console.log(decoded)
+
 
             next()
+
+
+
         } catch (error) {
             console.log(error)
             res.status(401)
@@ -35,3 +41,15 @@ exports.protect = asyncHandler(async(req, res, next) => {
     }
 
 })
+
+exports.role = (userRole) => {
+    return asyncHandler(async(req, res, next) => {
+        const user = await User.findOne({ "email": req.user.email }).select('-password')
+        if (user.userType == userRole) {
+            next()
+        } else {
+            res.status(401)
+            throw new Error('Not authorized...')
+        }
+    })
+}
