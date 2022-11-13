@@ -40,18 +40,26 @@ exports.create = asyncHandler(async(req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt)
 
     //api call to particle.io to check if given token and/or device_id is valid
+    var validate_device = false
+    var validate_token = false
     const particle = new Particle()
-    var validate = false
-    await particle.getDevice({ deviceId: device_id, auth: particle_token }).then(
-        function(data) {
-            validate = true
-        },
-        function(err) {
-            validate = false
-        }
-    )
-
-    if (validate) {
+    await particle.listDevices({ auth: particle_token }).then(
+            function(devices) {
+                validate_token = true
+                for (let dev of devices.body) {
+                    if (dev.id == device_id) {
+                        validate_device = true
+                        break
+                    }
+                }
+            },
+            function(err) {
+                validate_device = false
+                validate_token = false
+            }
+        )
+        //if deviceID and token are valid
+    if (validate_device && validate_token) {
 
         const newPatient = new User({
             firstName: firstName,
@@ -63,7 +71,7 @@ exports.create = asyncHandler(async(req, res) => {
             physician_emai: ""
 
         });
-        await newPatient.save(function(err, data) {
+        newPatient.save(function(err, data) {
             if (err) {
                 res.status(400).send(err);
             } else {
@@ -111,6 +119,78 @@ exports.login = asyncHandler(async(req, res) => {
 exports.dashboard = asyncHandler(async(req, res) => {
     res.status(200).send({ message: req.user })
 })
+
+//getting device list
+exports.deviceList = asyncHandler(async(req, res) => {
+    const filter = { 'user_email': req.user.email }
+    Device.find(filter).select('-user_email -_id').exec(function(err, data) {
+        if (err) {
+            res.status(400).json({ message: 'Bad Request' })
+        } else {
+            res.status(200).json(data);
+        }
+    })
+})
+
+//adding device
+exports.addDevice = asyncHandler(async(req, res) => {
+    const device_id = req.body.device_id
+
+    var val = false
+    const particle = new Particle()
+    await particle.listDevices({ auth: req.user.particle_token }).then(
+        function(devices) {
+            for (let dev of devices.body) {
+                if (dev.id == device_id) {
+                    val = true
+                    break
+                }
+            }
+        },
+        function(err) {
+            val = false
+        }
+    )
+
+    if (val) { //if given device Id is valid
+        const findDevice = await Device.findOne({ device_id }) //check if it has been claimed by another user
+        if (findDevice) {
+            res.status(400)
+            throw new Error('Device was claimed by another user')
+        } else {
+            const userDevice = new Device({
+                device_id: device_id,
+                user_email: req.user.email
+            });
+
+            userDevice.save(function(err, device) {
+                if (err) {
+                    res.status(400).send(err);
+                } else {
+                    res.status(201).json({ message: `Device with id(${device.device_id}) info has been save` });
+                }
+            })
+        }
+    } else {
+        res.status(400).send({ message: " invalid Device ID" })
+    }
+})
+
+exports.removeDevice = asyncHandler(async(req, res) => {
+
+    Device.findOneAndDelete({ device_id: { $eq: req.params.device_id }, user_email: { $eq: req.user.email } }, function(err, data) {
+
+        if (err) {
+            res.status(400).json({ message: 'Bad Request' })
+        } else {
+            if (!data)
+                res.status(400).json({ message: "Bad request" });
+            else
+                res.status(200).json({ message: "Device removed successfully!" });
+        }
+    })
+})
+
 const generateToken = (email, userType) => {
     return jwt.sign({
             email: email
