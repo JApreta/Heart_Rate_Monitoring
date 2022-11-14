@@ -190,6 +190,26 @@ exports.removeDevice = asyncHandler(async(req, res) => {
         }
     })
 })
+exports.updatePhysician = asyncHandler(async(req, res) => {
+    const filter = { email: req.user.email };
+    const update = { physician_email: req.body.physician_email };
+
+
+    const findPhysician = await User.findOne({ email: { $eq: req.body.physician_email }, userType: { $eq: "physician" } }) //check if given email is on the db as a physician
+    if (!findPhysician) {
+        res.status(400)
+        throw new Error('This email is not linked to a Physician Account')
+    }
+    User.findOneAndUpdate(filter, update, function(err, data) {
+        if (err) {
+
+            res.status(400).json({ message: "Bad Request" })
+        } else {
+            res.status(201).json({ message: "Physician updated successfully!" });
+
+        }
+    })
+})
 
 const generateToken = (email, userType) => {
     return jwt.sign({
