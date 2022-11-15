@@ -77,6 +77,19 @@ exports.login = asyncHandler(async(req, res) => {
 exports.dashboard = asyncHandler(async(req, res) => {
     res.status(200).send({ message: req.user })
 })
+
+exports.patientList = asyncHandler(async(req, res) => {
+    User.find({ physician_email: { $eq: req.user.email } }, function(err, data) {
+        if (err) {
+            res.status(400).json({ message: "Bad Request" })
+
+        } else {
+            res.status(200).json(data)
+
+        }
+    })
+
+})
 const generateToken = (email, userType) => {
     return jwt.sign({
             email: email

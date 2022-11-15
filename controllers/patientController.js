@@ -179,7 +179,6 @@ exports.addDevice = asyncHandler(async(req, res) => {
 exports.removeDevice = asyncHandler(async(req, res) => {
 
     Device.findOneAndDelete({ device_id: { $eq: req.params.device_id }, user_email: { $eq: req.user.email } }, function(err, data) {
-
         if (err) {
             res.status(400).json({ message: 'Bad Request' })
         } else {
