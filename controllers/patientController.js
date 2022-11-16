@@ -95,7 +95,7 @@ exports.create = asyncHandler(async(req, res) => {
         })
 
     } else
-        res.status(400).send({ message: " invalid Device ID and or Particle Token" })
+        res.status(400).send({ error: " invalid Device ID and or Particle Token" })
 
 })
 
@@ -107,7 +107,7 @@ exports.login = asyncHandler(async(req, res) => {
     const user = await User.findOne({ email })
 
     if (user && (await bcrypt.compare(password, user.password))) {
-        res.json({
+        res.status(200).json({
             email: user.email,
             token: generateToken(user.email, user.userType),
         })
