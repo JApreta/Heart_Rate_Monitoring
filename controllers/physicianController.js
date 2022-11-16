@@ -17,16 +17,16 @@ exports.create = asyncHandler(async(req, res) => {
 
     //check if all the required inputs are given
     if (!firstName || !lastName || !email || !password) {
-        res.status(400)
-        throw new Error('Please add all Fields')
+        res.status(400).json({ error: 'Please add all Fields' })
+            //throw new Error('Please add all Fields')
     }
     //look for user in the db
     const findUser = await User.findOne({ email })
 
     //if user already on db... trow an error
     if (findUser) {
-        res.status(400)
-        throw new Error('User Already exist')
+        res.status(400).json({ error: 'User Already exist' })
+            //throw new Error('User Already exist')
     }
 
 
@@ -70,8 +70,8 @@ exports.login = asyncHandler(async(req, res) => {
             token: generateToken(user.email, user.userType),
         })
     } else {
-        res.status(400)
-        throw new Error('Invalid credentials')
+        res.status(400).json({ error: 'Invalid credentials' })
+            //throw new Error('Invalid credentials')
     }
 })
 exports.dashboard = asyncHandler(async(req, res) => {

@@ -16,8 +16,8 @@ exports.create = asyncHandler(async(req, res) => {
 
     //check if all the required inputs are given
     if (!firstName || !lastName || !email || !password || !device_id || !particle_token) {
-        res.status(400)
-        throw new Error('Please add all Fields')
+        res.status(400).json({ error: 'Please add all Fields' })
+            //throw new Error('Please add all Fields')
     }
     //look for user and device in the db
     const findUser = await User.findOne({ email })
@@ -25,14 +25,14 @@ exports.create = asyncHandler(async(req, res) => {
 
     //if user already on db... trow an error
     if (findUser) {
-        res.status(400)
-        throw new Error('User Already exist')
+        res.status(400).json({ error: 'User Already exist' })
+            //throw new Error('User Already exist')
     }
 
     //if device already claimed... trow an error
     if (findDevice) {
-        res.status(400)
-        throw new Error('Device was claimed by another user')
+        res.status(400).json({ error: 'Device was claimed by another user' })
+            // throw new Error('Device was claimed by another user')
     }
 
     //hashing the password
@@ -155,8 +155,8 @@ exports.addDevice = asyncHandler(async(req, res) => {
     if (val) { //if given device Id is valid
         const findDevice = await Device.findOne({ device_id }) //check if it has been claimed by another user
         if (findDevice) {
-            res.status(400)
-            throw new Error('Device was claimed by another user')
+            res.status(400).json({ error: 'Device was claimed by another user' })
+                //throw new Error('Device was claimed by another user')
         } else {
             const userDevice = new Device({
                 device_id: device_id,
@@ -196,8 +196,8 @@ exports.updatePhysician = asyncHandler(async(req, res) => {
 
     const findPhysician = await User.findOne({ email: { $eq: req.body.physician_email }, userType: { $eq: "physician" } }) //check if given email is on the db as a physician
     if (!findPhysician) {
-        res.status(400)
-        throw new Error('This email is not linked to a Physician Account')
+        res.status(400).json({ error: 'This email is not linked to a Physician Account' })
+            //throw new Error('This email is not linked to a Physician Account')
     }
     User.findOneAndUpdate(filter, update, function(err, data) {
         if (err) {
