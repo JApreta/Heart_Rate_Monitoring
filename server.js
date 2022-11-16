@@ -53,6 +53,8 @@ app.use("/js", express.static(path.resolve(__dirname, "public/js")))
 
 //loading routers
 app.use('/', require('./routes/index'));
+app.use('/api/patient', require('./routes/patient'));
+app.use('/api/physician', require('./routes/physician'));
 app.use('/patient', require('./routes/patient'));
 app.use('/physician', require('./routes/physician'));
 

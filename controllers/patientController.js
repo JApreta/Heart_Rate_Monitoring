@@ -112,8 +112,8 @@ exports.login = asyncHandler(async(req, res) => {
             token: generateToken(user.email, user.userType),
         })
     } else {
-        res.status(400)
-        throw new Error('Invalid credentials')
+        res.status(400).json({ error: "Invalid credentials" })
+            //throw new Error('Invalid credentials')
     }
 })
 exports.dashboard = asyncHandler(async(req, res) => {

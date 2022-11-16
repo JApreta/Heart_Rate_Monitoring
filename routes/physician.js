@@ -11,12 +11,12 @@ router.get('/signup', function(req, res) {
 })
 
 
-router.post('/api/create', Physician_controller.create)
-router.post('/api/login', Physician_controller.login)
-router.get('/api/dashboard', protect, role('physician'), Physician_controller.dashboard)
+router.post('/create', Physician_controller.create)
+router.post('/login', Physician_controller.login)
+router.get('/dashboard', protect, role('physician'), Physician_controller.dashboard)
 
 //patient info endpoints
-router.get('/api/patient-list', protect, role('physician'), Patient_controller.patientList)
+router.get('/patient-list', protect, role('physician'), Physician_controller.patientList)
     //router.get('/api/patient-detail/:email', protect, role('physician'), Patient_controller.patientDetail)
 
 

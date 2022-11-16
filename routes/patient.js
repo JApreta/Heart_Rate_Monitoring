@@ -12,16 +12,16 @@ router.get('/signup', function(req, res) {
 
 })
 
-router.post('/api/create', Patient_controller.create)
-router.post('/api/login', Patient_controller.login)
-router.get('/api/dashboard', protect, role('patient'), Patient_controller.dashboard)
+router.post('/create', Patient_controller.create)
+router.post('/login', Patient_controller.login)
+router.get('/dashboard', protect, role('patient'), Patient_controller.dashboard)
 
 //device info endpoints
-router.get('/api/device-list', protect, role('patient'), Patient_controller.deviceList)
-router.post('/api/add-device', protect, role('patient'), Patient_controller.addDevice)
-router.delete('/api/remove-device/:device_id', protect, role('patient'), Patient_controller.removeDevice)
+router.get('/device-list', protect, role('patient'), Patient_controller.deviceList)
+router.post('/add-device', protect, role('patient'), Patient_controller.addDevice)
+router.delete('/remove-device/:device_id', protect, role('patient'), Patient_controller.removeDevice)
     //user update info endpoints
-router.put('/api/update-physician', protect, role('patient'), Patient_controller.updatePhysician)
+router.put('/update-physician', protect, role('patient'), Patient_controller.updatePhysician)
     //router.put('/api/update-password', protect, role('patient'), Patient_controller.passwordReset)
     //router.put('/api/update-particle-token', protect, role('patient'), Patient_controller.updateParticleToken)
     //router.put('/api/update-user-info', protect, role('patient'), Patient_controller.updateUserInfo)
