@@ -22,12 +22,7 @@ exports.protect = asyncHandler(async(req, res, next) => {
             req.user = await User.findOne({ "email": decoded.email }).select('-password')
 
             console.log(decoded)
-
-
             next()
-
-
-
         } catch (error) {
             console.log(error)
             res.status(401).json({ error: 'Not authorized' })
