@@ -7,7 +7,7 @@ const { protect, role } = require('../middleware/auth')
 
 
 router.post('/create', Patient_controller.create)
-router.post('/login', Patient_controller.login)
+    //router.post('/login', Patient_controller.login)
 router.get('/dashboard', protect, role('patient'), Patient_controller.dashboard)
 
 //device info endpoints

@@ -110,6 +110,7 @@ exports.login = asyncHandler(async(req, res) => {
         res.status(200).json({
             email: user.email,
             token: generateToken(user.email, user.userType),
+            userType: user.userType
         })
     } else {
         res.status(400).json({ error: "Invalid credentials" })

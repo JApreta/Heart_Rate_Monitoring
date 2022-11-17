@@ -5,14 +5,10 @@ const { protect, role } = require('../middleware/auth')
 
 
 
-router.get('/signup', function(req, res) {
-    res.render('physician/signup')
-
-})
 
 
 router.post('/create', Physician_controller.create)
-router.post('/login', Physician_controller.login)
+    //router.post('/login', Physician_controller.login)
 router.get('/dashboard', protect, role('physician'), Physician_controller.dashboard)
 
 //patient info endpoints

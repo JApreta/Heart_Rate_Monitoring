@@ -30,14 +30,14 @@ exports.protect = asyncHandler(async(req, res, next) => {
 
         } catch (error) {
             console.log(error)
-            res.status(401)
-            throw new Error('Not authorized')
+            res.status(401).json({ error: 'Not authorized' })
+                //throw new Error('Not authorized')
         }
     }
 
     if (!token) {
-        res.status(401)
-        throw new Error('Not authorized, no token')
+        res.status(401).json({ error: 'Not authorized, no token' })
+            //throw new Error('Not authorized, no token')
     }
 
 })
@@ -48,8 +48,8 @@ exports.role = (userRole) => {
         if (user.userType == userRole) {
             next()
         } else {
-            res.status(401)
-            throw new Error('Not authorized...')
+            res.status(401).json({ error: 'Not authorized...' })
+                //throw new Error('Not authorized...')
         }
     })
 }
