@@ -6,12 +6,6 @@ const { protect, role } = require('../middleware/auth')
 
 
 
-
-router.get('/signup', function(req, res) {
-    res.render('patient/signup')
-
-})
-
 router.post('/create', Patient_controller.create)
 router.post('/login', Patient_controller.login)
 router.get('/dashboard', protect, role('patient'), Patient_controller.dashboard)

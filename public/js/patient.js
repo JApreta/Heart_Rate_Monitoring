@@ -1,5 +1,3 @@
-const { $where } = require("../../models/user");
-
 $("#signUpForm").submit(function(event) {
 
     event.preventDefault();
@@ -36,24 +34,24 @@ $("#signUpForm").submit(function(event) {
         window.alert("Password must contain at least one digit!");
         return;
     }
-    if (pwd != $("#confirm_pwd").val()) {
-        window.alert("Passwords Don't Match!");
-        return;
-    }
-    var device = ('#device').val()
-    var token = ('#particle_token').val()
+    // if (pwd != $("#confirm_pwd").val()) {
+    //     window.alert("Passwords Don't Match!");
+    //     return;
+    // }
+
     var userData = {
         firstName: $('#firstName').val(),
         lastName: $('#lastName').val(),
         email: $('#email').val(),
         password: pwd,
-        device_id: ('#device').val(),
-        particle_token: ('#particle_token').val(),
+        device_id: $('#device_id').val(),
+        particle_token: $('#particle_token').val(),
     };
 
     // send new user details to server
+
     $.ajax({
-            url: '/api/patient/create',
+            url: '../../../api/patient/create',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(userData),
@@ -61,13 +59,15 @@ $("#signUpForm").submit(function(event) {
         })
         .done(function(data, textStatus, jqXHR) {
             if (jqXHR.status == 201) {
-                alert(data.token)
-            } else {
-                alert(textStatus)
+                alert(JSON.stringify(textStatus))
+                console.log(JSON.stringify(data))
+
             }
         })
         .fail(function(data, textStatus, jqXHR) {
 
+            alert(JSON.stringify(data.responseJSON.error))
+            $(location).attr('href', '../patient/dashboard.html');
         });
 
 });

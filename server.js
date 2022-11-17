@@ -42,14 +42,17 @@ app.use(cookieParser());
 
 
 //setting view engine
-app.set("view engine", "pug")
-app.set('views', path.join(__dirname, 'views'))
-    //app.set('views', path.join(__dirname, 'views/patient'))
+//app.set("view engine", "pug")
+//app.set('views', path.join(__dirname, 'views'))
+//app.set('views', path.join(__dirname, 'views/patient'))
+
+app.use(express.static(__dirname + '/public'));
 
 //loading assets
 app.use("/css", express.static(path.resolve(__dirname, "public/css")))
 app.use("/img", express.static(path.resolve(__dirname, "public/img")))
 app.use("/js", express.static(path.resolve(__dirname, "public/js")))
+app.use("/patient", express.static(path.resolve(__dirname, "public/patient")))
 
 //loading routers
 app.use('/', require('./routes/index'));

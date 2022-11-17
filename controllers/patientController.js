@@ -85,7 +85,7 @@ exports.create = asyncHandler(async(req, res) => {
                         res.status(400).send(err);
                     } else {
                         let msgStr = `patient with email(${data.email}) info has been save`;
-                        res.status(201).json({
+                        res.status(201).send({
                             message: msgStr,
                             token: generateToken(data.email, data.userType)
                         });
