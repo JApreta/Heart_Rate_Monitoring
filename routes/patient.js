@@ -12,6 +12,7 @@ router.get('/dashboard', protect, role('patient'), Patient_controller.dashboard)
 
 //device info endpoints
 router.get('/device-list', protect, role('patient'), Patient_controller.deviceList)
+router.get('/physician-list', protect, role('patient'), Patient_controller.physicianList)
 router.post('/add-device', protect, role('patient'), Patient_controller.addDevice)
 router.delete('/remove-device/:device_id', protect, role('patient'), Patient_controller.removeDevice)
     //user update info endpoints

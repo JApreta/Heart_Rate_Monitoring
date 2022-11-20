@@ -4,6 +4,7 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/user')
 const Device = require('../models/device')
 const Particle = require('particle-api-js')
+const { generateApiKey } = require('generate-api-key');
 var dotenv = require('dotenv')
 dotenv.config({ path: '../config/config.env' }) //load config file
 
@@ -118,7 +119,19 @@ exports.login = asyncHandler(async(req, res) => {
     }
 })
 exports.dashboard = asyncHandler(async(req, res) => {
-    res.status(200).send({ message: req.user })
+    res.status(200).json(req.user)
+})
+
+//getting physician list
+exports.physicianList = asyncHandler(async(req, res) => {
+    const filter = { userType: 'physician' }
+    User.find(filter).select('-password -_id -particle_token -userType').exec(function(err, data) {
+        if (err) {
+            res.status(400).json({ error: 'Bad Request' })
+        } else {
+            res.status(200).json(data);
+        }
+    })
 })
 
 //getting device list
@@ -126,7 +139,7 @@ exports.deviceList = asyncHandler(async(req, res) => {
     const filter = { 'user_email': req.user.email }
     Device.find(filter).select('-user_email -_id').exec(function(err, data) {
         if (err) {
-            res.status(400).json({ message: 'Bad Request' })
+            res.status(400).json({ error: 'Bad Request' })
         } else {
             res.status(200).json(data);
         }
@@ -161,19 +174,23 @@ exports.addDevice = asyncHandler(async(req, res) => {
         } else {
             const userDevice = new Device({
                 device_id: device_id,
-                user_email: req.user.email
+                user_email: req.user.email,
+                device_apiKey: generateApiKey({
+                    method: 'string',
+                    pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                })
             });
 
             userDevice.save(function(err, device) {
                 if (err) {
-                    res.status(400).send(err);
+                    res.status(400).json({ error: 'Bad Request' });
                 } else {
-                    res.status(201).json({ message: `Device with id(${device.device_id}) info has been save` });
+                    res.status(200).json({ message: `Device with id( ${device.device_id}) info has been save` });
                 }
             })
         }
     } else {
-        res.status(400).send({ message: " invalid Device ID" })
+        res.status(400).send({ error: " Invalid Device ID" })
     }
 })
 
@@ -181,34 +198,35 @@ exports.removeDevice = asyncHandler(async(req, res) => {
 
     Device.findOneAndDelete({ device_id: { $eq: req.params.device_id }, user_email: { $eq: req.user.email } }, function(err, data) {
         if (err) {
-            res.status(400).json({ message: 'Bad Request' })
+            res.status(400).json({ error: 'Bad Request' })
         } else {
             if (!data)
-                res.status(400).json({ message: "Bad request" });
+                res.status(400).json({ error: "Bad request" });
             else
                 res.status(200).json({ message: "Device removed successfully!" });
         }
     })
 })
 exports.updatePhysician = asyncHandler(async(req, res) => {
-    const filter = { email: req.user.email };
-    const update = { physician_email: req.body.physician_email };
+    const filter = { email: req.user.email }
+    const update = { physician_email: req.body.physician_email }
 
 
     const findPhysician = await User.findOne({ email: { $eq: req.body.physician_email }, userType: { $eq: "physician" } }) //check if given email is on the db as a physician
     if (!findPhysician) {
-        res.status(400).json({ error: 'This email is not linked to a Physician Account' })
+        res.status(400).json({ error: `${req.body.physician_email} This email is not linked to a Physician Account` })
             //throw new Error('This email is not linked to a Physician Account')
+    } else {
+        User.findOneAndUpdate(filter, update, function(err, data) {
+            if (err) {
+
+                res.status(400).json({ message: "Bad Request" })
+            } else {
+                res.status(200).json({ message: "Physician updated successfully!" });
+
+            }
+        })
     }
-    User.findOneAndUpdate(filter, update, function(err, data) {
-        if (err) {
-
-            res.status(400).json({ message: "Bad Request" })
-        } else {
-            res.status(201).json({ message: "Physician updated successfully!" });
-
-        }
-    })
 })
 
 const generateToken = (email, userType) => {

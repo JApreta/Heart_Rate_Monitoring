@@ -8,6 +8,10 @@ const DeviceSchema = new mongoose.Schema({
     user_email: {
         type: String,
         required: true
+    },
+    device_apiKey: {
+        type: String,
+        required: true
     }
 })
 
