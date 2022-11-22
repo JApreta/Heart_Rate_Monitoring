@@ -2,7 +2,7 @@
 
 
  function removeDevice(id) {
-     alert(id)
+
      $.ajax({
              url: `../../../api/patient/remove-device/${id}`,
              method: 'DELETE',
@@ -214,7 +214,7 @@
              .done(function(data, textStatus, jqXHR) {
                  if (jqXHR.status == 200) {
                      alert(JSON.stringify(data.message))
-                     location.reload();
+                     getDeviceList()
 
                  } else {
                      alert(JSON.stringify(data.responseJSON.error))
@@ -227,6 +227,50 @@
 
              });
      }
+ });
+
+ $("#myInfoForm").submit(function(event) {
+
+     event.preventDefault();
+
+     if ($('#firstName').val() === "") {
+         window.alert("Invalid First Name!");
+         return;
+     }
+     if ($('#lastName').val() === "") {
+         window.alert("Invalid Last Name!");
+         return;
+     }
+     var userData = {
+         firstName: $('#firstName').val(),
+         lastName: $('#lastName').val()
+     }
+
+     $.ajax({
+             url: '../../../api/patient/update-user-info',
+             method: 'PUT',
+             headers: {
+                 contentType: 'application/json',
+                 authorization: `Bearer ${localStorage.getItem("token")}`
+             },
+             data: userData,
+             dataType: 'json'
+         })
+         .done(function(data, textStatus, jqXHR) {
+             if (jqXHR.status == 200) {
+                 alert(JSON.stringify(data.message))
+                 getUserInfo()
+
+             } else {
+                 alert(JSON.stringify(data.responseJSON.error))
+             }
+         })
+         .fail(function(data, textStatus, jqXHR) {
+             alert(JSON.stringify(data.responseJSON.error))
+
+
+         });
+
  });
 
  //  $(function() {

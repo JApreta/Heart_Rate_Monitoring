@@ -79,7 +79,12 @@ exports.create = asyncHandler(async(req, res) => {
                 //save user's first device
                 const userDevice = new Device({
                     device_id: device_id,
-                    user_email: email
+                    user_email: email,
+                    device_apiKey: generateApiKey({
+                        method: 'string',
+                        pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                    })
+
                 });
                 userDevice.save(function(err, device) {
                     if (err) {
@@ -223,6 +228,25 @@ exports.updatePhysician = asyncHandler(async(req, res) => {
                 res.status(400).json({ message: "Bad Request" })
             } else {
                 res.status(200).json({ message: "Physician updated successfully!" });
+
+            }
+        })
+    }
+})
+
+exports.updateUserInfo = asyncHandler(async(req, res) => {
+    const filter = { email: req.user.email }
+    const update = { firstName: req.body.firstName, lastName: req.body.lastName }
+    if (!req.body.firstName || !req.body.lastName) {
+        res.status(400).json({ error: 'Please add all Fields' })
+
+    } else {
+        User.findOneAndUpdate(filter, update, function(err, data) {
+            if (err) {
+
+                res.status(400).json({ message: "Bad Request" })
+            } else {
+                res.status(200).json({ message: "User Information updated successfully!" });
 
             }
         })

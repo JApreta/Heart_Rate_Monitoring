@@ -19,7 +19,7 @@ router.delete('/remove-device/:device_id', protect, role('patient'), Patient_con
 router.put('/update-physician', protect, role('patient'), Patient_controller.updatePhysician)
     //router.put('/update-password', protect, role('patient'), Patient_controller.passwordReset)
     //router.put('/update-particle-token', protect, role('patient'), Patient_controller.updateParticleToken)
-    //router.put('/update-user-info', protect, role('patient'), Patient_controller.updateUserInfo)
+router.put('/update-user-info', protect, role('patient'), Patient_controller.updateUserInfo)
 
 
 module.exports = router;
