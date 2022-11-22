@@ -41,6 +41,10 @@ int betweenMeas = 30;//Set betweenMeas to the time you would like between Measur
 int lTime = betweenMeas * -1;//Set
 
 
+int Rate3, oxxxy;
+
+String fullJson;
+
 Stateys cState = standby;
 LEDStatus mainBitch(RGB_COLOR_GREY, LED_PATTERN_FADE,LED_PRIORITY_NORMAL,LED_SOURCE_DEFAULT);
 LEDStatus wConnect(RGB_COLOR_YELLOW, LED_PATTERN_SOLID,LED_PRIORITY_BACKGROUND,LED_SOURCE_DEFAULT);
@@ -73,8 +77,10 @@ void setup()
     int adcRange = 16384; //Options: 2048, 4096, 8192, 16384
     particleSensor.setup(ledBrightness, sampleAverage, ledMode, sampleRate, pulseWidth, adcRange); //Configure sensor with these settings
 
-
-    
+    //Establish Online set Variables
+    Particle.variable("Rate",Rate3);
+    Particle.variable("Oxxxy", oxxxy);
+    Particle.variable("FullJson", fullJson );
 }
 
 
@@ -191,8 +197,9 @@ void lFlash(int color){
 
 //Sending Function
 bool sendData(int r, int o){
-
-
+    Rate3 = r;
+    oxxxy = o;
+    fullJson = String::format("{Rate\":%d,\"Oxy\":%d,\"Time\":%d:%d:%d, \"Date\":%d\\%d\\%d}", r, o, Time.hour(),Time.minute(),Time.second(),Time.month(), Time.day(),Time.year());
     //publish wil return 0 if send is not successful, return back to main in order to catch errors:0
     if(!Particle.publish("testEvent", String::format("{\"Rate\":%d,\"Oxy\":%d,\"Time\":%d}", r, o, Time.now()))){
       olDatar[cNum] = r;
@@ -200,6 +207,8 @@ bool sendData(int r, int o){
       olDatao[cNum] = o;
       return 0;}
     delay(1000);
+    // fullJson = String::format("{\"Rate\":%d,\"Oxy\":%d,\"Time\":%d:%d:%d, \"Date\":%d\\%d\\%d}", r, o, Time.hour(),Time.minute(),Time.second(),Time.month(), Time.day(),Time.year());
+   
     Serial.print("\njust sent");
     return 1;
 
