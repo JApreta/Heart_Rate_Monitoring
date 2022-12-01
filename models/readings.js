@@ -5,10 +5,6 @@ const ReadingSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    user_email: {
-        type: String,
-        required: true
-    },
     Rate: {
         type: Number,
         required: true
@@ -28,4 +24,4 @@ const ReadingSchema = new mongoose.Schema({
 
 })
 
-module.exports = mongoose.model('Readings', UserSchema)
+module.exports = mongoose.model('Readings', ReadingSchema)

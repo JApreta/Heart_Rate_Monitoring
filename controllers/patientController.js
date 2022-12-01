@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/user')
 const Device = require('../models/device')
+const Readings = require('../models/readings')
 const Particle = require('particle-api-js')
 const { generateApiKey } = require('generate-api-key');
 var dotenv = require('dotenv')
@@ -253,9 +254,71 @@ exports.updateUserInfo = asyncHandler(async(req, res) => {
     }
 })
 
+exports.saveReading = asyncHandler(async(req, res) => {
+    //betweenMeas for tghe
+
+    if (!req.body.day || !req.body.month || !req.body.year || !req.body.hour || !req.body.minute) {
+        res.status(400).json({ error: 'Please add all Fields' })
+            //throw new Error('Please add all Fields')
+    } else {
+        const findDevice = await Device.findOne({ device_id: req.body.coreid, device_apiKey: req.body.api_key })
+        if (!findDevice)
+            res.status(400).json({ error: 'Incorrect Device ID or API Key' })
+        else {
+
+
+            const format = {
+                dd: req.body.day,
+                mm: req.body.month,
+                yyyy: req.body.year,
+                HH: req.body.hour,
+                MM: req.body.minute,
+
+            };
+
+            let readingDate = `${format.mm}/${format.dd}/${format.yyyy}`
+            let readingTime = `${format.HH}:${format.MM}`
+
+            const newReading = new Readings({
+                device_id: req.body.coreid,
+                Rate: req.body.rate,
+                Oxy: req.body.oxy,
+                Date: readingDate,
+                Time: readingTime
+            });
+
+            newReading.save(function(err, device) {
+                if (err) {
+
+                    console.log(req.body) // Call your action on the request here
+                    res.status(400).end() // Responding is important
+                } else {
+                    console.log(req.body) // Call your action on the request here
+                    res.status(200).json({ message: "Reading has been recorded" });
+                }
+            })
+        }
+    }
+})
+
 const generateToken = (email, userType) => {
     return jwt.sign({
             email: email
         },
         secret, { expiresIn: '90d' })
 }
+
+const formatData = (input) => {
+    if (input > 9) {
+        return input;
+    } else return `0${input}`;
+};
+
+// Function to convert
+// 24 Hour to 12 Hour clock
+const formatHour = (input) => {
+    if (input > 12) {
+        return input - 12;
+    }
+    return input;
+};
