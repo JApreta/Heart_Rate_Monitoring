@@ -98,6 +98,7 @@
                  $('#email').val(data.email)
                  $('#firstName').val(data.firstName)
                  $('#lastName').val(data.lastName)
+                 localStorage.setItem("userEmail", data.email)
                  for (let i = 0; i < physicians.length; i++) {
                      physicianList += `<option value="${physicians[i].email}">${physicians[i].firstName} ${physicians[i].lastName}</option>`
                      if (data.physician_email == physicians[i].email)
@@ -273,17 +274,197 @@
 
  });
 
- //  $(function() {
 
- //      $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
- //          localStorage.setItem('lastTab', $(this).attr('href'));
- //      });
- //      var lastTab = localStorage.getItem('lastTab');
 
- //      if (lastTab) {
- //          $('[href="' + lastTab + '"]').tab('show');
- //      }
+ function getWeeklyReport() {
+     $.ajax({
+             url: '../../../api/patient/weekly-summary',
+             method: 'GET',
+             headers: {
+                 contentType: 'application/json',
+                 authorization: `Bearer ${localStorage.getItem("token")}`
+             },
+             dataType: 'json'
+         })
+         .done(function(data, textStatus, jqXHR) {
 
- //  });
+             if (jqXHR.status == 200) {
+                 const today = new Date()
+                 const yesterday = new Date(today.getTime())
+                 const sevenDaysAgo = new Date(today.getTime())
+                 yesterday.setDate(today.getDate() - 1)
+                 sevenDaysAgo.setDate(today.getDate() - 7)
+                 $('#minRate').html(`${data.min} BPM`)
+                 $('#maxRate').html(`${data.max} BPM`)
+                 $('#avgRate').html(`${data.avg.toFixed(2)} BPM`)
+                 $('#wReportDate').html(`
+                  From ${sevenDaysAgo.getMonth()+1}/${sevenDaysAgo.getDate()}/${sevenDaysAgo.getFullYear()}
+                 To ${yesterday.getMonth()+1}/${yesterday.getDate()}/${yesterday.getFullYear()}  
+                 `)
+
+             } else {
+                 alert(JSON.stringify(data.error))
+             }
+         })
+         .fail(function(data, textStatus, jqXHR) {
+
+             alert(JSON.stringify(data.responseJSON.error))
+
+         });
+ }
+
+ function getDailyReport() {
+     $.ajax({
+             url: '../../../api/patient/daily-summary',
+             method: 'GET',
+             headers: {
+                 contentType: 'application/json',
+                 authorization: `Bearer ${localStorage.getItem("token")}`
+             },
+             data: { "selectedDate": "12/01/2022", "email": localStorage.getItem("userEmail") },
+             dataType: 'json'
+         })
+         .done(function(data, textStatus, jqXHR) {
+
+             if (jqXHR.status == 200) {
+
+                 new Chart('rateGraph', {
+                     type: 'line',
+                     data: {
+                         datasets: [{
+                             label: 'HEART RATE',
+                             data: data.rate,
+                             borderColor: 'white',
+                             fill: 'false',
+                         }]
+                     },
+                     options: {
+                         scales: {
+                             yAxes: [{
+                                 ticks: {
+                                     beginAtZero: true
+                                 }
+                             }],
+                             xAxes: [{
+                                 type: 'time',
+                                 time: {
+                                     parser: 'H:mm',
+                                     unit: 'hour',
+                                     stepSize: 1,
+                                     displayFormats: {
+                                         hour: 'H:mm'
+                                     },
+                                     tooltipFormat: 'H:mm'
+                                 },
+                                 ticks: {
+                                     min: '0:00',
+                                     max: '23:59'
+                                 }
+                             }]
+                         }
+                     }
+                 });
+
+
+                 new Chart('oxyGraph', {
+                     type: 'line',
+                     data: {
+                         datasets: [{
+                             label: 'Blood Oxygen Saturation',
+                             data: data.oxy,
+                             borderColor: 'white',
+                             fill: 'false',
+                         }]
+                     },
+                     options: {
+                         scales: {
+                             yAxes: [{
+                                 ticks: {
+                                     beginAtZero: true
+                                 }
+                             }],
+                             xAxes: [{
+                                 type: 'time',
+                                 time: {
+                                     parser: 'H:mm',
+                                     unit: 'hour',
+                                     stepSize: 1,
+                                     displayFormats: {
+                                         hour: 'H:mm'
+                                     },
+                                     tooltipFormat: 'H:mm'
+                                 },
+                                 ticks: {
+                                     min: '0:00',
+                                     max: '23:59'
+                                 }
+                             }]
+                         }
+                     }
+                 });
+
+                 new Chart('rateBarGraph', {
+                     type: 'bar',
+                     data: {
+                         labels: data.barLabel,
+                         datasets: [{
+                             label: 'HEART RATE',
+                             data: data.barRates,
+                             backgroundColor: graphBgColor(data.barLabel.length),
+                         }]
+                     },
+                     options: {
+                         scales: {
+                             y: {
+
+                                 beginAtZero: true
+
+                             }
+
+                         }
+                     }
+                 });
+
+                 new Chart('oxyBarGraph', {
+                     type: 'bar',
+                     data: {
+                         labels: data.barLabel,
+                         datasets: [{
+                             label: 'Blood Oxygen Saturation',
+                             data: data.barOxy,
+                             backgroundColor: graphBgColor(data.barLabel.length),
+                         }]
+                     },
+                     options: {
+                         scales: {
+                             y: {
+
+                                 beginAtZero: true
+
+                             }
+
+                         }
+                     }
+                 });
+
+             } else {
+                 alert(JSON.stringify(data.error))
+             }
+         })
+         .fail(function(data, textStatus, jqXHR) {
+
+             alert(JSON.stringify(data.responseJSON.error))
+
+         });
+ }
+
+ function graphBgColor(length) {
+     let bgColor = []
+     for (let i = 0; i < length; i++)
+         bgColor.push('rgba(153, 102, 255)')
+     return bgColor
+ }
+ getWeeklyReport()
+ getDailyReport()
  getDeviceList()
  getUserInfo()

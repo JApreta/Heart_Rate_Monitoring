@@ -21,7 +21,8 @@ router.put('/update-physician', protect, role('patient'), Patient_controller.upd
     //router.put('/update-particle-token', protect, role('patient'), Patient_controller.updateParticleToken)
 router.put('/update-user-info', protect, role('patient'), Patient_controller.updateUserInfo)
 router.post('/readings', Patient_controller.saveReading)
-    //router.post('/device-reading-list', protect, role('patient'), Patient_controller.readingList)
+router.get('/weekly-summary', protect, role('patient'), Patient_controller.weeklySummary)
+router.get('/daily-summary', protect, Patient_controller.dailySummary)
     //router.post('/measurment-frequency', protect, role('patient'), Patient_controller.updateMeasurmentFreq)
     //router.post('/measurment-time', protect, role('patient'), Patient_controller.updateMeasurmentTime)
 

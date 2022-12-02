@@ -186,7 +186,7 @@ exports.addDevice = asyncHandler(async(req, res) => {
                     pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                 })
             });
-
+            await Device.updateMany({ user_email: { $eq: req.user.email } }, { status: "Deactive" })
             userDevice.save(function(err, device) {
                 if (err) {
                     res.status(400).json({ error: 'Bad Request' });
@@ -287,7 +287,8 @@ exports.saveReading = asyncHandler(async(req, res) => {
                 Rate: req.body.rate,
                 Oxy: req.body.oxy,
                 Date: readingDate,
-                Time: readingTime
+                Time: readingTime,
+                sortDate: new Date(readingDate)
             });
 
             newReading.save(function(err, device) {
@@ -296,12 +297,117 @@ exports.saveReading = asyncHandler(async(req, res) => {
                     console.log(req.body) // Call your action on the request here
                     res.status(400).end() // Responding is important
                 } else {
-                    console.log(req.body) // Call your action on the request here
+                    const today = new Date()
+                    const yesterday = new Date(today.getTime())
+                    const sevenDaysAgo = new Date(today.getTime())
+                    yesterday.setDate(today.getDate() - 1)
+                    sevenDaysAgo.setDate(today.getDate() - 7)
+                    console.log(sevenDaysAgo) // Call your action on the request here
                     res.status(200).json({ message: "Reading has been recorded" });
                 }
             })
         }
     }
+})
+
+exports.weeklySummary = asyncHandler(async(req, res) => {
+    //get active device ID
+
+    const findDevice = await Device.findOne({ user_email: req.user.email, status: 'Active' })
+
+    const today = new Date()
+    const yesterday = new Date(today.getTime())
+    const sevenDaysAgo = new Date(today.getTime())
+    yesterday.setDate(today.getDate() - 1)
+    sevenDaysAgo.setDate(today.getDate() - 7)
+
+    if (findDevice) {
+        Readings.find({
+            device_id: findDevice.device_id,
+            sortDate: {
+                $gte: new Date(sevenDaysAgo),
+                $lte: new Date(yesterday)
+            }
+        }, function(err, data) {
+            if (err) {
+                res.status(400).json({ error: 'Bad Request' })
+            } else {
+                if (data) {
+                    let avg = 0,
+                        min = data[0].Rate,
+                        max = data[0].Rate
+                    for (let i = 0; i < data.length; i++) {
+                        avg += data[i].Rate
+                        if (data[i].Rate <= min)
+                            min = data[i].Rate
+                        else if (data[i].Rate >= max)
+                            max = data[i].Rate
+                    }
+                    avg = avg / data.length
+                    res.status(200).json({ device: findDevice.device_id, avg: avg, min: min, max: max })
+                } else
+                    res.status(400).json({ error: "something went wrong" });
+
+
+            }
+        })
+    } else
+        res.status(400).json({ error: 'No ACtive Device Registred for this user' })
+
+})
+
+
+exports.dailySummary = asyncHandler(async(req, res) => {
+    //get active device ID
+
+    const findDevice = await Device.findOne({ user_email: req.query.email, status: 'Active' })
+
+    const selectedDate = new Date(req.query.selectedDate);
+
+    if (findDevice) {
+        Readings.find({
+            device_id: findDevice.device_id,
+            sortDate: { $eq: selectedDate }
+        }).sort('-Time').exec((err, data) => {
+            if (err) {
+                res.status(400).json({ error: 'Bad Request' })
+            } else {
+                if (data) {
+                    let rate = [],
+                        oxy = [],
+                        labels = [],
+                        rates = [],
+                        oxys = []
+                    for (let i = 0; i < data.length; i++) {
+                        rate.push({
+                            t: data[i].Time,
+                            y: Number(data[i].Rate)
+                        })
+
+                        oxy.push({
+                            t: data[i].Time,
+                            y: Number(data[i].Oxy)
+                        })
+                        labels.push(data[i].Time)
+                        rates.push(Number(data[i].Rate))
+                        oxys.push(Number(data[i].Oxy))
+                    }
+
+                    res.status(200).json({ rate: rate, oxy: oxy, barLabel: labels.reverse(), barRates: rates.reverse(), barOxy: oxys.reverse() })
+                } else
+                    res.status(400).json({ error: "something went wrong" });
+
+
+            }
+        })
+    } else
+        res.status(400).json({ error: 'No ACtive Device Registred for this user' })
+
+})
+
+
+exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
+
 })
 
 const generateToken = (email, userType) => {
@@ -312,7 +418,7 @@ const generateToken = (email, userType) => {
 }
 
 const formatData = (input) => {
-    if (input > 9) {
+    if (input > 9 || input == 0) {
         return input;
     } else return `0${input}`;
 };

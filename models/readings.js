@@ -21,6 +21,10 @@ const ReadingSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    sortDate: {
+        type: Date,
+        required: true
+    }
 
 })
 

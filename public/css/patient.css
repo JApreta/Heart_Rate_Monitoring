@@ -23,3 +23,20 @@ table {
 .btn-primary {
     background: #6666ff !important;
 }
+
+.wreport {
+    margin: 0 auto;
+    text-align: center;
+    width: 600px;
+}
+
+.round {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #6666ff !important;
+    color: white;
+    margin: 0 auto;
+    text-align: center;
+    padding: 25px;
+}
