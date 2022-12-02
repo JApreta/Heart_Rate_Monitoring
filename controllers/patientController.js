@@ -257,7 +257,10 @@ exports.updateUserInfo = asyncHandler(async(req, res) => {
 exports.saveReading = asyncHandler(async(req, res) => {
     //betweenMeas for tghe
 
-    if (!req.body.day || !req.body.month || !req.body.year || !req.body.hour || !req.body.minute) {
+
+    if (!req.body.day || !req.body.month || !req.body.year ||
+        !req.body.hour || !req.body.minute || !req.body.coreid ||
+        !req.body.rate || !req.body.oxy || !req.body.api_key) {
         res.status(400).json({ error: 'Please add all Fields' })
             //throw new Error('Please add all Fields')
     } else {

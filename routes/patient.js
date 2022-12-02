@@ -20,7 +20,7 @@ router.put('/update-physician', protect, role('patient'), Patient_controller.upd
     //router.put('/update-password', protect, role('patient'), Patient_controller.passwordReset)
     //router.put('/update-particle-token', protect, role('patient'), Patient_controller.updateParticleToken)
 router.put('/update-user-info', protect, role('patient'), Patient_controller.updateUserInfo)
-router.put('/readings', Patient_controller.saveReading)
+router.post('/readings', Patient_controller.saveReading)
 
 
 module.exports = router;
