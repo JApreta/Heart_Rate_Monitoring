@@ -364,10 +364,19 @@ exports.dailySummary = asyncHandler(async(req, res) => {
 
     const selectedDate = new Date(req.query.selectedDate);
 
+    const formatD = {
+        dd: formatData(selectedDate.getDate()),
+        mm: formatData(selectedDate.getMonth() + 1),
+        yyyy: selectedDate.getFullYear()
+
+    };
+
+    let readingDate = `${formatD.mm}/${formatD.dd}/${formatD.yyyy}`
+
     if (findDevice) {
         Readings.find({
             device_id: findDevice.device_id,
-            sortDate: { $eq: selectedDate }
+            Date: { $eq: readingDate }
         }).sort('-Time').exec((err, data) => {
             if (err) {
                 res.status(400).json({ error: 'Bad Request' })
