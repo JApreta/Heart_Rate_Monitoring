@@ -12,6 +12,11 @@ const DeviceSchema = new mongoose.Schema({
     device_apiKey: {
         type: String,
         required: true
+    },
+    status: {
+        type: String,
+        default: 'Active'
+
     }
 })
 

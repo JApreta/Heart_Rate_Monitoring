@@ -271,11 +271,11 @@ exports.saveReading = asyncHandler(async(req, res) => {
 
 
             const format = {
-                dd: req.body.day,
-                mm: req.body.month,
+                dd: formatData(req.body.day),
+                mm: formatData(req.body.month),
                 yyyy: req.body.year,
-                HH: req.body.hour,
-                MM: req.body.minute,
+                HH: formatData(req.body.hour),
+                MM: formatData(req.body.minute),
 
             };
 
