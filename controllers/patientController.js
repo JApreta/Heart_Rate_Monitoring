@@ -12,7 +12,8 @@ dotenv.config({ path: '../config/config.env' }) //load config file
 
 //const secret = process.env.JWT
 const secret = "abchowiqgcq123"
-    //create and save new patient
+
+//create and save new patient
 exports.create = asyncHandler(async(req, res) => {
 
     const { firstName, lastName, email, password, device_id, particle_token } = req.body
@@ -82,20 +83,20 @@ exports.create = asyncHandler(async(req, res) => {
                 const userDevice = new Device({
                     device_id: device_id,
                     user_email: email,
-                    device_apiKey: generateApiKey({
+                    device_apiKey: generateApiKey({ //generates the API key for the device 
                         method: 'string',
                         pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                     })
 
                 });
-                userDevice.save(function(err, device) {
+                userDevice.save(function(err, device) { // save the device on db
                     if (err) {
                         res.status(400).send(err);
                     } else {
                         let msgStr = `patient with email(${data.email}) info has been save`;
                         res.status(201).send({
                             message: msgStr,
-                            token: generateToken(data.email, data.userType)
+                            token: generateToken(data.email)
                         });
                     }
                 })
@@ -109,17 +110,17 @@ exports.create = asyncHandler(async(req, res) => {
 
 //patient login
 exports.login = asyncHandler(async(req, res) => {
-    const { email, password } = req.body
+    const { email, password } = req.body // get the given user name and password
 
-    // Check for user email
+    // try to find the user for user email
     const user = await User.findOne({ email })
 
-    if (user && (await bcrypt.compare(password, user.password))) {
+    if (user && (await bcrypt.compare(password, user.password))) { //if the user was fornd and the given password match the saved hash
         res.status(200).json({
-            email: user.email,
-            token: generateToken(user.email, user.userType),
-            userType: user.userType
-        })
+                email: user.email,
+                token: generateToken(user.email), //generates a token for the user seession
+                userType: user.userType
+            }) //returns the user email, user type and the auth token
     } else {
         res.status(400).json({ error: "Invalid credentials" })
             //throw new Error('Invalid credentials')
@@ -129,9 +130,12 @@ exports.dashboard = asyncHandler(async(req, res) => {
     res.status(200).json(req.user)
 })
 
-//getting physician list
+/*
+this function finds and return the physician list saved on the db
+*/
 exports.physicianList = asyncHandler(async(req, res) => {
     const filter = { userType: 'physician' }
+        //confidential data like the physician password are not returned
     User.find(filter).select('-password -_id -particle_token -userType').exec(function(err, data) {
         if (err) {
             res.status(400).json({ error: 'Bad Request' })
@@ -141,9 +145,9 @@ exports.physicianList = asyncHandler(async(req, res) => {
     })
 })
 
-//getting device list
+//find and return the  device list for a single user on the db
 exports.deviceList = asyncHandler(async(req, res) => {
-    const filter = { 'user_email': req.user.email }
+    const filter = { 'user_email': req.user.email } // get the user email of the authenticated user
     Device.find(filter).select('-user_email -_id').exec(function(err, data) {
         if (err) {
             res.status(400).json({ error: 'Bad Request' })
@@ -153,12 +157,12 @@ exports.deviceList = asyncHandler(async(req, res) => {
     })
 })
 
-//adding device
+//this funtion adds a new patient  device on db
 exports.addDevice = asyncHandler(async(req, res) => {
-    const device_id = req.body.device_id
-
+    const device_id = req.body.device_id // get the given device ID
     var val = false
     const particle = new Particle()
+        //make an API call to check if the given device ID is valid and claimed by the user on particle.io
     await particle.listDevices({ auth: req.user.particle_token }).then(
         function(devices) {
             for (let dev of devices.body) {
@@ -168,10 +172,7 @@ exports.addDevice = asyncHandler(async(req, res) => {
                 }
             }
         },
-        function(err) {
-            val = false
-        }
-    )
+        function(err) { val = false })
 
     if (val) { //if given device Id is valid
         const findDevice = await Device.findOne({ device_id }) //check if it has been claimed by another user
@@ -179,7 +180,7 @@ exports.addDevice = asyncHandler(async(req, res) => {
             res.status(400).json({ error: 'Device was claimed by another user' })
                 //throw new Error('Device was claimed by another user')
         } else {
-            const userDevice = new Device({
+            const userDevice = new Device({ //create a new device obj with the given data
                 device_id: device_id,
                 user_email: req.user.email,
                 device_apiKey: generateApiKey({
@@ -187,8 +188,8 @@ exports.addDevice = asyncHandler(async(req, res) => {
                     pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                 })
             });
-            await Device.updateMany({ user_email: { $eq: req.user.email } }, { status: "Deactive" })
-            userDevice.save(function(err, device) {
+            await Device.updateMany({ user_email: { $eq: req.user.email } }, { status: "Deactive" }) //set all the prev saved device status to deactive
+            userDevice.save(function(err, device) { //save the new device
                 if (err) {
                     res.status(400).json({ error: 'Bad Request' });
                 } else {
@@ -201,22 +202,23 @@ exports.addDevice = asyncHandler(async(req, res) => {
     }
 })
 
+//given a divice ID and the patient email,this function finds and removes a device from the user account
 exports.removeDevice = asyncHandler(async(req, res) => {
-
-    Device.findOneAndDelete({ device_id: { $eq: req.params.device_id }, user_email: { $eq: req.user.email } }, function(err, data) {
-        if (err) {
-            res.status(400).json({ error: 'Bad Request' })
-        } else {
-            if (!data)
-                res.status(400).json({ error: "Bad request" });
-            else
-                res.status(200).json({ message: "Device removed successfully!" });
-        }
+        Device.findOneAndDelete({ device_id: { $eq: req.params.device_id }, user_email: { $eq: req.user.email } }, function(err, data) {
+            if (err) {
+                res.status(400).json({ error: 'Bad Request' })
+            } else {
+                if (!data)
+                    res.status(400).json({ error: "Bad request" });
+                else
+                    res.status(200).json({ message: "Device removed successfully!" });
+            }
+        })
     })
-})
+    //given a physicion email, this fuction updates the patient account with the choosen physician
 exports.updatePhysician = asyncHandler(async(req, res) => {
-    const filter = { email: req.user.email }
-    const update = { physician_email: req.body.physician_email }
+    const filter = { email: req.user.email } //get the pattient email
+    const update = { physician_email: req.body.physician_email } //get the physicsian email
 
 
     const findPhysician = await User.findOne({ email: { $eq: req.body.physician_email }, userType: { $eq: "physician" } }) //check if given email is on the db as a physician
@@ -224,7 +226,7 @@ exports.updatePhysician = asyncHandler(async(req, res) => {
         res.status(400).json({ error: `${req.body.physician_email} This email is not linked to a Physician Account` })
             //throw new Error('This email is not linked to a Physician Account')
     } else {
-        User.findOneAndUpdate(filter, update, function(err, data) {
+        User.findOneAndUpdate(filter, update, function(err, data) { //if the physician is registerd on db, updated the patient account
             if (err) {
 
                 res.status(400).json({ message: "Bad Request" })
@@ -236,14 +238,15 @@ exports.updatePhysician = asyncHandler(async(req, res) => {
     }
 })
 
+//this function updates the patient full name
 exports.updateUserInfo = asyncHandler(async(req, res) => {
-    const filter = { email: req.user.email }
-    const update = { firstName: req.body.firstName, lastName: req.body.lastName }
+    const filter = { email: req.user.email } //get the user email
+    const update = { firstName: req.body.firstName, lastName: req.body.lastName } //get the user new full name
     if (!req.body.firstName || !req.body.lastName) {
         res.status(400).json({ error: 'Please add all Fields' })
 
     } else {
-        User.findOneAndUpdate(filter, update, function(err, data) {
+        User.findOneAndUpdate(filter, update, function(err, data) { //find and update the patient info
             if (err) {
 
                 res.status(400).json({ message: "Bad Request" })
@@ -357,25 +360,25 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
 
 })
 
-
+//this function finds and return the heart rate and O2 reading from the user's active device to be graphed 
 exports.dailySummary = asyncHandler(async(req, res) => {
-    //get active device ID
 
+    //get active device ID
     const findDevice = await Device.findOne({ user_email: req.query.email, status: 'Active' })
 
-    const selectedDate = new Date(req.query.selectedDate);
+    const selectedDate = new Date(req.query.selectedDate); //get selected date
 
     const formatD = {
-        dd: formatData(selectedDate.getDate()),
-        mm: formatData(selectedDate.getMonth() + 1),
+        dd: formatData(selectedDate.getDate()), //make day dd
+        mm: formatData(selectedDate.getMonth() + 1), //make month mm
         yyyy: selectedDate.getFullYear()
 
     };
 
-    let readingDate = `${formatD.mm}/${formatD.dd}/${formatD.yyyy}`
+    let readingDate = `${formatD.mm}/${formatD.dd}/${formatD.yyyy}` //format given date as mm/dd/yyyy
 
     if (findDevice) {
-        Readings.find({
+        Readings.find({ //find and return the data from the given device and time, order by time desc
             device_id: findDevice.device_id,
             Date: { $eq: readingDate }
         }).sort('-Time').exec((err, data) => {
@@ -387,7 +390,7 @@ exports.dailySummary = asyncHandler(async(req, res) => {
                         oxy = [],
                         labels = [],
                         rates = [],
-                        oxys = []
+                        oxys = [] // vars that hold the graphing data
                     for (let i = 0; i < data.length; i++) {
                         rate.push({
                             t: data[i].Time,
@@ -402,12 +405,10 @@ exports.dailySummary = asyncHandler(async(req, res) => {
                         rates.push(Number(data[i].Rate))
                         oxys.push(Number(data[i].Oxy))
                     }
-
+                    //return the graphing data
                     res.status(200).json({ rate: rate, oxy: oxy, barLabel: labels.reverse(), barRates: rates.reverse(), barOxy: oxys.reverse() })
                 } else
                     res.status(400).json({ error: "something went wrong" });
-
-
             }
         })
     } else
@@ -415,7 +416,7 @@ exports.dailySummary = asyncHandler(async(req, res) => {
 
 })
 
-
+//this function updates the device measurment freq on particle.io
 exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
     //check if input are valid
     if (!req.body.email || !req.body.arg || isNaN(req.body.arg.delayokay)) {
@@ -428,8 +429,8 @@ exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
             //try to find the patient active device
             const findDevice = await Device.findOne({ user_email: req.body.email, status: 'Active' })
             if (findDevice) { //if found
-                const particle_token = findUser.particle_token
-                const deviceID = findDevice.device_id
+                const particle_token = findUser.particle_token //get the user particle.io token
+                const deviceID = findDevice.device_id // get the user active device ID
                     //make an API call to particle IO to update the valiable using axios
                 axios.post(`https://api.particle.io/v1/devices/${deviceID}/setBetweenUpdate`, {
                     data: {
@@ -455,24 +456,14 @@ exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
 
 })
 
-const generateToken = (email, userType) => {
-    return jwt.sign({
-            email: email
-        },
-        secret, { expiresIn: '90d' })
+//this function uses jwt to generate the user auth token given the email
+const generateToken = (email) => {
+    return jwt.sign({ email: email }, secret, { expiresIn: '90d' })
 }
 
+//this function formats the Data to have a xx-xx format
 const formatData = (input) => {
     if (input > 9 || input == 0) {
         return input;
     } else return `0${input}`;
-};
-
-// Function to convert
-// 24 Hour to 12 Hour clock
-const formatHour = (input) => {
-    if (input > 12) {
-        return input - 12;
-    }
-    return input;
 };
