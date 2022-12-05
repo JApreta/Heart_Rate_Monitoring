@@ -1,8 +1,6 @@
-    alert('oi')
     $("#signUpForm").submit(function(event) {
 
         event.preventDefault();
-        alert('oi')
 
         // data validation
         if ($('#firstName').val() === "") {
@@ -36,10 +34,10 @@
             window.alert("Password must contain at least one digit!");
             return;
         }
-        // if (pwd != $("#confirm_pwd").val()) {
-        //     window.alert("Passwords Don't Match!");
-        //     return;
-        // }
+        if (pwd != $("#confirm_pwd").val()) {
+            window.alert("Passwords Don't Match!");
+            return;
+        }
 
         var userData = {
             firstName: $('#firstName').val(),
