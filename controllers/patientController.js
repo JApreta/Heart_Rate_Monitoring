@@ -336,7 +336,7 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
             if (err) {
                 res.status(400).json({ error: 'Bad Request' })
             } else {
-                if (data) {
+                if (data.length > 0) {
                     let avg = 0,
                         min = data[0].Rate,
                         max = data[0].Rate
@@ -350,7 +350,7 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
                     avg = avg / data.length
                     res.status(200).json({ device: findDevice.device_id, avg: avg, min: min, max: max })
                 } else
-                    res.status(400).json({ error: "something went wrong" });
+                    res.status(400).json({ error: "NO READINGS HAVE BEEN RECORDED" });
 
 
             }
@@ -385,7 +385,7 @@ exports.dailySummary = asyncHandler(async(req, res) => {
             if (err) {
                 res.status(400).json({ error: 'Bad Request' })
             } else {
-                if (data) {
+                if (data.length > 0) {
                     let rate = [],
                         oxy = [],
                         labels = [],
@@ -408,7 +408,7 @@ exports.dailySummary = asyncHandler(async(req, res) => {
                     //return the graphing data
                     res.status(200).json({ rate: rate, oxy: oxy, barLabel: labels.reverse(), barRates: rates.reverse(), barOxy: oxys.reverse() })
                 } else
-                    res.status(400).json({ error: "something went wrong" });
+                    res.status(400).json({ error: "NO READINGS HAVE BEEN RECORDED" });
             }
         })
     } else
@@ -419,7 +419,7 @@ exports.dailySummary = asyncHandler(async(req, res) => {
 //this function updates the device measurment freq on particle.io
 exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
     //check if input are valid
-    if (!req.body.email || !req.body.arg || isNaN(req.body.arg.delayokay)) {
+    if (!req.body.email || !req.body.arg) {
         res.status(400).json({ error: 'Please add all Fields with valid values' })
 
     } else {
@@ -432,18 +432,18 @@ exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
                 const particle_token = findUser.particle_token //get the user particle.io token
                 const deviceID = findDevice.device_id // get the user active device ID
                     //make an API call to particle IO to update the valiable using axios
-                axios.post(`https://api.particle.io/v1/devices/${deviceID}/setBetweenUpdate`, {
-                    data: {
+                axios.post(`https://api.particle.io/v1/devices/e00fce684b9c2c1fbe4d6ae9/setBetweenUpdate`, {
                         arg: req.body.arg
-                    },
-                    headers: {
-                        'Authorization': `Bearer ${particle_token}`
+                    }, {
+                        headers: {
+                            'Authorization': `Bearer 2ba55849ee70571a5bc63956942e66a009d6c0c3`
+                        }
                     }
 
-                }).then(function(response) {
+                ).then(function(response) {
 
                     res.status(200).json({ message: "Measurment Frequncy was updated" })
-                }).catch(err => { res.status(400).json({ error: 'something went wrong' }) })
+                }).catch(err => { res.status(400).json({ error: 'something went wrong...' }) })
             } else {
                 res.status(400).json({ error: 'No active device found for this patient' })
             }
