@@ -1,0 +1,46 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    color: white;
+}
+
+.main-container {
+    position: absolute;
+    margin: 0 auto;
+    top: 20%;
+}
+
+#login {
+    width: 90%;
+    height: 90%;
+}
+
+#logInF {
+    margin: 0 auto !important;
+    text-align: center !important;
+}
+
+.aboutProject {
+    min-height: 400px;
+}
+
+#newAccountDiv {
+    margin: auto;
+    width: 60%;
+    padding: 10px;
+    text-align: center;
+}
+
+.regForm {
+    margin: 0 auto;
+    position: relative;
+    width: 500px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background: #6666ff !important;
+}

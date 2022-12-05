@@ -1,3 +1,4 @@
+//this files contains the Device Reading model
 const mongoose = require('mongoose')
 
 const ReadingSchema = new mongoose.Schema({

@@ -126,13 +126,14 @@ exports.login = asyncHandler(async(req, res) => {
             //throw new Error('Invalid credentials')
     }
 })
+
+//returns the user basic info
 exports.dashboard = asyncHandler(async(req, res) => {
     res.status(200).json(req.user)
 })
 
-/*
-this function finds and return the physician list saved on the db
-*/
+
+//this function finds and return the physician list saved on the db
 exports.physicianList = asyncHandler(async(req, res) => {
     const filter = { userType: 'physician' }
         //confidential data like the physician password are not returned
@@ -258,75 +259,67 @@ exports.updateUserInfo = asyncHandler(async(req, res) => {
     }
 })
 
+//this function saves reading from the device to the db
 exports.saveReading = asyncHandler(async(req, res) => {
-    //betweenMeas for tghe
+        //check if all the required data inputs were given
+        if (!req.body.day || !req.body.month || !req.body.year ||
+            !req.body.hour || !req.body.minute || !req.body.coreid ||
+            !req.body.rate || !req.body.oxy || !req.body.api_key) {
+            res.status(400).json({ error: 'Please add all Fields' })
+                //throw new Error('Please add all Fields')
+        } else {
+            //try to loacte the given device on db
+            const findDevice = await Device.findOne({ device_id: req.body.coreid, device_apiKey: req.body.api_key })
+            if (!findDevice) //if not found throw an error
+                res.status(400).json({ error: 'Incorrect Device ID or API Key' })
+            else { //if found
+                const format = {
+                    dd: formatData(req.body.day), //format the given day as dd
+                    mm: formatData(req.body.month), //format the given month as mm
+                    yyyy: req.body.year,
+                    HH: formatData(req.body.hour), //format the given hour as hh
+                    MM: formatData(req.body.minute), //format the given minute as mm
 
+                };
 
-    if (!req.body.day || !req.body.month || !req.body.year ||
-        !req.body.hour || !req.body.minute || !req.body.coreid ||
-        !req.body.rate || !req.body.oxy || !req.body.api_key) {
-        res.status(400).json({ error: 'Please add all Fields' })
-            //throw new Error('Please add all Fields')
-    } else {
-        const findDevice = await Device.findOne({ device_id: req.body.coreid, device_apiKey: req.body.api_key })
-        if (!findDevice)
-            res.status(400).json({ error: 'Incorrect Device ID or API Key' })
-        else {
+                let readingDate = `${format.mm}/${format.dd}/${format.yyyy}` //format the given date as mm/dd/yyyy
+                let readingTime = `${format.HH}:${format.MM}` //format the given time as hh:MM
 
+                const newReading = new Readings({ //create a new Reading obj with the given data
+                    device_id: req.body.coreid,
+                    Rate: req.body.rate,
+                    Oxy: req.body.oxy,
+                    Date: readingDate,
+                    Time: readingTime,
+                    sortDate: new Date(readingDate)
+                });
 
-            const format = {
-                dd: formatData(req.body.day),
-                mm: formatData(req.body.month),
-                yyyy: req.body.year,
-                HH: formatData(req.body.hour),
-                MM: formatData(req.body.minute),
+                newReading.save(function(err, device) { //save the reading data on the db
+                    if (err) {
+                        console.log(req.body) // Call your action on the request here
+                        res.status(400).end() // Responding is important
+                    } else {
 
-            };
-
-            let readingDate = `${format.mm}/${format.dd}/${format.yyyy}`
-            let readingTime = `${format.HH}:${format.MM}`
-
-            const newReading = new Readings({
-                device_id: req.body.coreid,
-                Rate: req.body.rate,
-                Oxy: req.body.oxy,
-                Date: readingDate,
-                Time: readingTime,
-                sortDate: new Date(readingDate)
-            });
-
-            newReading.save(function(err, device) {
-                if (err) {
-
-                    console.log(req.body) // Call your action on the request here
-                    res.status(400).end() // Responding is important
-                } else {
-                    const today = new Date()
-                    const yesterday = new Date(today.getTime())
-                    const sevenDaysAgo = new Date(today.getTime())
-                    yesterday.setDate(today.getDate() - 1)
-                    sevenDaysAgo.setDate(today.getDate() - 7)
-                    console.log(sevenDaysAgo) // Call your action on the request here
-                    res.status(200).json({ message: "Reading has been recorded" });
-                }
-            })
+                        console.log(req.body) // Call your action on the request here
+                        res.status(200).json({ message: "Reading has been recorded" });
+                    }
+                })
+            }
         }
-    }
-})
-
+    })
+    // this function calculates and returns the min max and avg heart rate of the user for the past 7days
 exports.weeklySummary = asyncHandler(async(req, res) => {
     //get active device ID
-
     const findDevice = await Device.findOne({ user_email: req.user.email, status: 'Active' })
 
     const today = new Date()
     const Startday = new Date(today.getTime())
     const sevenDaysAgo = new Date(today.getTime())
-    Startday.setDate(today.getDate())
-    sevenDaysAgo.setDate(today.getDate() - 7)
+    Startday.setDate(today.getDate()) //get the 7th day
+    sevenDaysAgo.setDate(today.getDate() - 7) // get the 1st day
 
-    if (findDevice) {
-        Readings.find({
+    if (findDevice) { // if device was found
+        Readings.find({ // get its readings from the past 7 days
             device_id: findDevice.device_id,
             sortDate: {
                 $gte: new Date(sevenDaysAgo),
@@ -336,7 +329,7 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
             if (err) {
                 res.status(400).json({ error: 'Bad Request' })
             } else {
-                if (data.length > 0) {
+                if (data.length > 0) { // calculates the max min and avg if readings have been recorded
                     let avg = 0,
                         min = data[0].Rate,
                         max = data[0].Rate
@@ -348,11 +341,9 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
                             max = data[i].Rate
                     }
                     avg = avg / data.length
-                    res.status(200).json({ device: findDevice.device_id, avg: avg, min: min, max: max })
+                    res.status(200).json({ device: findDevice.device_id, avg: avg, min: min, max: max }) // return the results
                 } else
                     res.status(400).json({ error: "NO READINGS HAVE BEEN RECORDED" });
-
-
             }
         })
     } else
@@ -385,6 +376,7 @@ exports.dailySummary = asyncHandler(async(req, res) => {
             if (err) {
                 res.status(400).json({ error: 'Bad Request' })
             } else {
+
                 if (data.length > 0) {
                     let rate = [],
                         oxy = [],
@@ -396,7 +388,6 @@ exports.dailySummary = asyncHandler(async(req, res) => {
                             t: data[i].Time,
                             y: Number(data[i].Rate)
                         })
-
                         oxy.push({
                             t: data[i].Time,
                             y: Number(data[i].Oxy)
@@ -432,13 +423,7 @@ exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
                 const particle_token = findUser.particle_token //get the user particle.io token
                 const deviceID = findDevice.device_id // get the user active device ID
                     //make an API call to particle IO to update the valiable using axios
-                axios.post(`https://api.particle.io/v1/devices/e00fce684b9c2c1fbe4d6ae9/setBetweenUpdate`, {
-                        arg: req.body.arg
-                    }, {
-                        headers: {
-                            'Authorization': `Bearer 2ba55849ee70571a5bc63956942e66a009d6c0c3`
-                        }
-                    }
+                axios.post(`https://api.particle.io/v1/devices/${deviceID}/setBetweenUpdate`, { arg: req.body.arg }, { headers: { 'Authorization': `Bearer ${particle_token}` } }
 
                 ).then(function(response) {
 

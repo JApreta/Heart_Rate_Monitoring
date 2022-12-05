@@ -59,7 +59,7 @@ $(function() {
          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-user-gear"></i> </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" onclick="logout()">Logout</a></li>
-                            <li><a class="dropdown-item" href="physician/dashboard.html">Patient Portal</a></li>
+                            <li><a class="dropdown-item" href="physician/dashboard.html">Physician Portal</a></li>
                         </ul>`)
         }
         $('#signupOpt').css('display', 'none')
@@ -69,5 +69,6 @@ $(function() {
 function logout() {
     localStorage.removeItem("token")
     localStorage.removeItem("userType")
+    localStorage.removeItem("userEmail")
     $(location).attr('href', '../index.html');
 }

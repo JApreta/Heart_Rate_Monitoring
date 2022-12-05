@@ -78,6 +78,7 @@ app.use(function(err, req, res, next) {
     res.render('error')
 });
 
+//creates the https server
 const sslServer = https.createServer({
     key: fs.readFileSync(path.join(__dirname, 'certificate', 'key.pem')),
     cert: fs.readFileSync(path.join(__dirname, 'certificate', 'cert.pem'))

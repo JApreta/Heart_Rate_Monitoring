@@ -9,10 +9,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/70b519f58c.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <link href="../css/physician.css" rel="stylesheet" type="text/css" />
-    
+
     <script async>
         var token = localStorage.getItem("token");
         var userType = localStorage.getItem("userType");
@@ -27,103 +28,160 @@
 </head>
 
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <h2><i class="fa-solid fa-heart-pulse"></i>Physician Portal</h2>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end " id="navbarSupportedContent">
+                <ul class="navbar-nav  mb-2 mb-lg-0 ">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../index.html"><i class="fa-solid fa-house"></i></a>
+                    </li>
+                    <li class="nav-item" id="loginLogout">
+                        <a class="nav-link" href="#" onclick="logout()">Logout <i class="fa-solid fa-right-from-bracket"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <div class="container mt-3">
         <div class="row">
             <div class="col-md-12">
-                <h2>Physician Portal</h2>
+
                 <br>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs nav-fill" role="tablist" id="patientTabs">
                     <li class="nav-item" role="presentation">
-                        <a id="displayAllPatients" class="nav-link active" data-bs-toggle="tab" role="tab" href="#allPatients">All Patients</a>
+                        <a id="displayMyAccount" class="nav-link active" data-bs-toggle="tab" role="tab" href="#account">My account</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a id="displayAllPatients" class="nav-link" data-bs-toggle="tab" role="tab" href="#allPatients">All Patients</a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a id="displayPatientSummary" class="nav-link" data-bs-toggle="tab" role="tab" href="#patientSummary">Patient Summary</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a id = "displayPatientDetails" class="nav-link" data-bs-toggle="tab" role="tab" href="#patientsDetailedDay">Patient Detailed Day</a>
+                        <a id="displayPatientDetails" class="nav-link" data-bs-toggle="tab" role="tab" href="#patientsDetailedDay">Patient Detailed Day</a>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <a id="logout" class="nav-link" data-bs-toggle="tab" role="tab">Logout</a>
-                    </li>
+
                 </ul>
             </div>
-
+            <!-- Tab panes -->
             <div class="col-md-12">
-                <!-- Tab panes -->
-                <div id="allPatients" class="container tab-pane fade" role="tabpanel">
-                    <h3>All Patients</h3>
-                    <p id="patientListInfo">Temp Text</p>
-                </div>
-                <div id="patientSummary" class="container tab-pane fade" role="tabpanel">
-                    <h3>Patient Summary</h3>
-                    <form id="choosePatientSummary" class="mt-3 tabForm">
-                        <div class="input-group mb-3">
-                            <span class="input-group-text">Patients</span>
-                            <select class="form-control" id="getPatientSummary" required>
-                                <option selected disabled>select one</option>
-                            </select>
-                        </div>
-                    </form><br>
-
-                    <h3 id="patientSummaryHeader">Patient Summary: </h3>
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="wreport">
-                                <div>
-                                    <h3><i class="fa-solid fa-heart-pulse"></i> Your Summary Report</h3>
-                                    <h5 id="wReportDate">From mm/dd/yyyy to mm/dd/yyyy</h5>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6 round">
-                                        <h5>Min</h5>
-                                        <h3 id="minRate">00 BPM</h3>
+                <div class=" tab-content">
+                    <!-- Tab panes -->
+                    <div id="account" class="container tab-pane active show fade" role="tabpanel"><br>
+                        <div class="row">
+                            <div class="col-12">
+                                <form id="myInfoForm" class="mt-3 tabForm" method="POST">
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text" id="basic-addon1">Email</span>
+                                        <input type="email" name="email" id="email" disabled class="form-control" placeholder="email" aria-label="email" aria-describedby="basic-addon1">
                                     </div>
-                                    <div class="col-md-6 round">
-                                        <h5>MAX</h5>
-                                        <h3 id="maxRate">00 BPM</h3>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text">First Name</span>
+                                        <input type="text" class="form-control" name="firstName" id="firstName" placeholder="First Name" aria-label="First Name" required>
                                     </div>
-                                    <div class="col-6 round">
-                                        <h5>AVG</h5>
-                                        <h3 id="avgRate">00 BPM</h3>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text">Last Name</span>
+                                        <input type="text" class="form-control" name="lastName" id="lastName" placeholder="Last Name" aria-label="Last Name" required>
                                     </div>
-                                </div>
-                            </div><br>
-
-                            <form id="measurFreq" class="mt-3 tabForm" method="POST">
-                                <h3>Set Measurment Frequency</h3>
-                                <hr>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text" id="basic-addon1">Frequency</span>
-                                    <input type="number" name="betweenMeas" id="betweenMeas" min="30" max="60" step="5" class="form-control" value="30" aria-label="email" aria-describedby="basic-addon1">
-                                </div>
-                                <button type="submit" class="btn btn-primary form-control">Update</button>
-                                <hr>
-                            </form>
+                                    <button type="submit" class="btn btn-primary form-control">Update</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
 
-                </div>
-                
-                <div id="patientsDetailedDay" class="container tab-pane fade" role="tabpanel">
-                    <form id="choosePatientDetail" class="mt-3 tabForm">
-                        <div class="input-group mb-3">
-                            <span class="input-group-text">Patients</span>
-                            <select class="form-control" id="getPatientDetail" required>
+                    <div id="allPatients" class="container tab-pane  fade" role="tabpanel">
+
+                        <div id="patientListInfo">
+                            <h3>All Patients</h3>
+                        </div>
+
+                    </div>
+                    <div id="patientSummary" class="container tab-pane fade" role="tabpanel">
+                        <h3>Patient Weekly Summary</h3>
+                        <form id="choosePatientSummary" class="mt-3 tabForm">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Patients</span>
+                                <select class="form-control" id="getPatientSummary" required>
                                 <option selected disabled>select one</option>
                             </select>
-                        </div>
-                    </form>
+                            </div>
+                        </form><br>
 
-                    <h3 id="patientDetailHeader">Patient Details: </h3>
-                    <canvas id="rateGraph" height="90"></canvas>
-                    <canvas id="rateBarGraph" height="90"></canvas>
-                    <canvas id="oxyGraph" height="90"></canvas>
-                    <canvas id="oxyBarGraph" height="90"></canvas>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="wreport">
+                                    <div>
+                                        <h3 id="patientH"></h3>
+                                        <h5 id="wReportDate">From mm/dd/yyyy to mm/dd/yyyy</h5>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-6 round">
+                                            <h5>Min</h5>
+                                            <h3 id="minRate">00 BPM</h3>
+                                        </div>
+                                        <div class="col-md-6 round">
+                                            <h5>MAX</h5>
+                                            <h3 id="maxRate">00 BPM</h3>
+                                        </div>
+                                        <div class="col-6 round">
+                                            <h5>AVG</h5>
+                                            <h3 id="avgRate">00 BPM</h3>
+                                        </div>
+                                    </div>
+                                    <br>
+
+                                    <form id="measurFreq" class="mt-3 tabForm" method="POST">
+                                        <h3>Set Measurment Frequency</h3>
+                                        <hr>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text" id="basic-addon1">Frequency</span>
+                                            <input type="number" name="betweenMeas" id="betweenMeas" min="30" max="60" step="5" class="form-control" value="30" aria-label="email" aria-describedby="basic-addon1">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary form-control">Update</button>
+                                        <hr>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="patientsDetailedDay" class="container tab-pane fade" role="tabpanel">
+                        <form id="choosePatientDetail" class="mt-3 tabForm form-inline">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Patients</span>
+                                <select class="form-control" id="getPatientDetail" required>
+                                <option selected disabled>select one</option>
+                            </select>
+                            </div>
+                            <div class=" input-group mb-3">
+                                <span class="input-group-text">Date</span>
+                                <input type="date" class="form-control" id="readingDate" name="readingDate" value="" min="2010-01-01">
+
+                            </div>
+                            <button type="submit" class="btn btn-primary form-control">View Report</button>
+                            <hr>
+                            <hr>
+                        </form>
+
+                        <h3 id="patientDetailHeader">Patient Details: </h3>
+                        <canvas id="rateGraph" height="90"></canvas>
+                        <canvas id="rateBarGraph" height="90"></canvas>
+                        <canvas id="oxyGraph" height="90"></canvas>
+                        <canvas id="oxyBarGraph" height="90"></canvas>
+
+                    </div>
 
                 </div>
-
             </div>
         </div>
     </div>

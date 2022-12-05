@@ -1,3 +1,4 @@
+//this fils has the code for the db connection
 const mongoose = require('mongoose')
 const connectDB = async() => {
     try {

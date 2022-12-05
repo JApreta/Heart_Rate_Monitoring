@@ -76,12 +76,12 @@ exports.login = asyncHandler(async(req, res) => {
 })
 
 exports.dashboard = asyncHandler(async(req, res) => {
-    res.status(200);
+    res.status(200).json(req.user)
 })
 
 // this funcion finds and returns all of the physician's patients
 exports.getPatientList = asyncHandler(async(req, res) => {
-    User.find({physician_email: req.user.email}, function(err, data) {
+    User.find({ physician_email: req.user.email }, function(err, data) {
         if (err) {
             res.status(400).json({ message: "Bad Request" })
         } else {
@@ -92,7 +92,7 @@ exports.getPatientList = asyncHandler(async(req, res) => {
 
 // this funcion finds and returns all of the devices for a specified patient
 exports.getPatientDevice = asyncHandler(async(req, res) => {
-    Device.find({user_email: req.params.email}, function(err, data) {
+    Device.find({ user_email: req.params.email }, function(err, data) {
         if (err) {
             res.status(400).json({ message: "Bad Request" })
         } else {
@@ -103,7 +103,7 @@ exports.getPatientDevice = asyncHandler(async(req, res) => {
 
 // this funcion finds and returns all of a patient's readings for a specified device
 exports.getPatientReading = asyncHandler(async(req, res) => {
-    Readings.find({device_id: req.params.device}, function(err, data) {
+    Readings.find({ device_id: req.params.device }, function(err, data) {
         if (err) {
             res.status(400).json({ message: "Bad Request" })
         } else {
@@ -115,8 +115,8 @@ exports.getPatientReading = asyncHandler(async(req, res) => {
 // this function returns the summary of the patient's readings from the last 7 days (average rate, max rate, min rate) 
 exports.weeklySummary = asyncHandler(async(req, res) => {
     //get active device ID
-    const findDevice = await Device.findOne({ user_email: req.params.patient_email, status: 'Active' })
-    const patient = await User.findOne({user_email: req.params.patient_email})
+    const findDevice = await Device.findOne({ user_email: req.query.email, status: 'Active' })
+    const patient = await User.findOne({ email: req.query.email })
 
     const today = new Date()
     const Startday = new Date(today.getTime())
@@ -148,7 +148,7 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
                     }
                     avg = avg / data.length
                     let patientName = patient.firstName + " " + patient.lastName;
-                    res.status(200).json({ device: findDevice.device_id, avg: avg, min: min, max: max, name: patientName})
+                    res.status(200).json({ device: findDevice.device_id, avg: avg, min: min, max: max, name: patientName })
                 } else
                     res.status(400).json({ error: "NO READINGS HAVE BEEN RECORDED" });
             }
@@ -160,8 +160,8 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
 // this function finds and return the heart rate and O2 reading from the user's active device to be graphed 
 exports.dailySummary = asyncHandler(async(req, res) => {
     //get active device ID
-    const findDevice = await Device.findOne({ user_email: req.params.patient_email, status: 'Active' })
-    const patient = await User.findOne({user_email: req.params.patient_email})
+    const findDevice = await Device.findOne({ user_email: req.query.email, status: 'Active' })
+    const patient = await User.findOne({ email: req.query.email })
     const selectedDate = new Date(req.query.selectedDate); //get selected date
 
     const formatD = {
@@ -202,6 +202,7 @@ exports.dailySummary = asyncHandler(async(req, res) => {
                     }
                     //return the graphing data
                     let patientName = patient.firstName + " " + patient.lastName;
+
                     res.status(200).json({ rate: rate, oxy: oxy, barLabel: labels.reverse(), barRates: rates.reverse(), barOxy: oxys.reverse(), name: patientName })
                 } else
                     res.status(400).json({ error: "NO READINGS HAVE BEEN RECORDED" });
@@ -214,10 +215,9 @@ exports.dailySummary = asyncHandler(async(req, res) => {
 // this function updates the device measurment freq on particle.io
 exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
     // check if input are valid
-    if (!req.body.email || !req.body.arg){
+    if (!req.body.email || !req.body.arg) {
         res.status(400).json({ error: 'Please add all Fields with valid values' })
-    }
-    else{
+    } else {
         // try to find patient with given email
         const findUser = await User.findOne({ email: req.body.email })
         if (findUser) { // if found
@@ -228,13 +228,12 @@ exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
                 const deviceID = findDevice.device_id // get the user active device ID
                     // make an API call to particle IO to update the valiable using axios
                 axios.post(`https://api.particle.io/v1/devices/e00fce684b9c2c1fbe4d6ae9/setBetweenUpdate`, {
-                        arg: req.body.arg
-                    }, {
-                        headers: {
-                            'Authorization': `Bearer 2ba55849ee70571a5bc63956942e66a009d6c0c3`
-                        }
+                    arg: req.body.arg
+                }, {
+                    headers: {
+                        'Authorization': `Bearer 2ba55849ee70571a5bc63956942e66a009d6c0c3`
                     }
-                ).then(function(response) {
+                }).then(function(response) {
                     res.status(200).json({ message: "Measurment Frequncy was updated" })
                 }).catch(err => { res.status(400).json({ error: 'something went wrong...' }) })
             } else {
@@ -246,6 +245,26 @@ exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
     }
 })
 
+//this function updates the patient full name
+exports.updateUserInfo = asyncHandler(async(req, res) => {
+    const filter = { email: req.user.email } //get the user email
+    const update = { firstName: req.body.firstName, lastName: req.body.lastName } //get the user new full name
+    if (!req.body.firstName || !req.body.lastName) {
+        res.status(400).json({ error: 'Please add all Fields' })
+
+    } else {
+        User.findOneAndUpdate(filter, update, function(err, data) { //find and update the patient info
+            if (err) {
+
+                res.status(400).json({ message: "Bad Request" })
+            } else {
+                res.status(200).json({ message: "User Information updated successfully!" });
+
+            }
+        })
+    }
+})
+
 // this function uses jwt to generate the user auth token given the email
 const generateToken = (email, userType) => {
     return jwt.sign({
@@ -253,3 +272,10 @@ const generateToken = (email, userType) => {
         },
         secret, { expiresIn: '90d' })
 }
+
+//this function formats the Data to have a xx-xx format
+const formatData = (input) => {
+    if (input > 9 || input == 0) {
+        return input;
+    } else return `0${input}`;
+};

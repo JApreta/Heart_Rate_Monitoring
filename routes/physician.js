@@ -15,9 +15,9 @@ router.get('/patient-device/:email', protect, role('physician'), Physician_contr
 router.get('/patient-reading/:device', protect, role('physician'), Physician_controller.getPatientReading) // route to get readings from a device
 
 router.post('/measurment-frequency', protect, Physician_controller.updateMeasurmentFreq) // route to update the patient measurment frequency on particle io
-router.get('/patientSummary/:patient_email', protect, role('physician'), Patient_controller.weeklySummary) // route to get a patient's weeky reading summary
-router.get('/patientDetail/:patient_email', protect, Physician_controller.dailySummary) // route to get a patient's daily readings summary 
-
+router.get('/patientSummary', protect, role('physician'), Physician_controller.weeklySummary) // route to get a patient's weeky reading summary
+router.get('/patientDetail', protect, Physician_controller.dailySummary) // route to get a patient's daily readings summary 
+router.put('/update-user-info', protect, role('physician'), Physician_controller.updateUserInfo) //route to update the user basic info
 
 
 module.exports = router;

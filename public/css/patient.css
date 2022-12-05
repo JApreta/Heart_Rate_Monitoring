@@ -16,12 +16,27 @@ body,
     border-radius: 5px;
 }
 
+.tabDailyView {
+    width: 400px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.bg-dark {
+    background-color: black !important;
+}
+
 table {
     color: white !important;
 }
 
 .btn-primary {
     background: #6666ff !important;
+}
+
+.nav-tabs .nav-item a {
+    color: #6666ff !important;
+    font-weight: bold;
 }
 
 .wreport {
