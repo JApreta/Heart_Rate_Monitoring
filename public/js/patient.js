@@ -274,6 +274,44 @@
 
  });
 
+ //handles form submissin to update the measurment frequency
+ $("measurFreq").submit(function(event) {
+     event.preventDefault();
+
+     if ($('#betweenMeas').val() === "") { //check if an input was given
+         window.alert("invalide Frequency value!");
+         return;
+     }
+
+     var userData = { //get the freq valeu and the user email to be updated
+         arg: { "delayokay": $('#betweenMeas').val() },
+         email: localStorage.getItem("userEmail")
+     }
+
+     $.ajax({ // make an ajax call to server to update the freq
+             url: '../../../api/patient/measurment-frequency',
+             method: 'POST',
+             headers: {
+                 contentType: 'application/json',
+                 authorization: `Bearer ${localStorage.getItem("token")}`
+             },
+             data: userData,
+             dataType: 'json'
+         })
+         .done(function(data, textStatus, jqXHR) {
+             if (jqXHR.status == 200) { // check if update was done
+                 alert(JSON.stringify(data.message)) // and show success message
+
+             } else { // if failed 
+                 alert(JSON.stringify(data.responseJSON.error)) //show error message
+             }
+         })
+         .fail(function(data, textStatus, jqXHR) {
+             alert(JSON.stringify(data.responseJSON.error))
+
+         });
+
+ });
 
 
  function getWeeklyReport() {

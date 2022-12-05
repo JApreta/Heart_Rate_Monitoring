@@ -23,7 +23,7 @@ router.put('/update-user-info', protect, role('patient'), Patient_controller.upd
 router.post('/readings', Patient_controller.saveReading)
 router.get('/weekly-summary', protect, role('patient'), Patient_controller.weeklySummary)
 router.get('/daily-summary', protect, Patient_controller.dailySummary)
-    //router.post('/measurment-frequency', protect, role('patient'), Patient_controller.updateMeasurmentFreq)
+router.post('/measurment-frequency', protect, role('patient'), Patient_controller.updateMeasurmentFreq)
     //router.post('/measurment-time', protect, role('patient'), Patient_controller.updateMeasurmentTime)
 
 

@@ -7,6 +7,7 @@ const Readings = require('../models/readings')
 const Particle = require('particle-api-js')
 const { generateApiKey } = require('generate-api-key');
 var dotenv = require('dotenv')
+const axios = require('axios')
 dotenv.config({ path: '../config/config.env' }) //load config file
 
 //const secret = process.env.JWT
@@ -316,9 +317,9 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
     const findDevice = await Device.findOne({ user_email: req.user.email, status: 'Active' })
 
     const today = new Date()
-    const yesterday = new Date(today.getTime())
+    const Startday = new Date(today.getTime())
     const sevenDaysAgo = new Date(today.getTime())
-    yesterday.setDate(today.getDate() - 1)
+    Startday.setDate(today.getDate())
     sevenDaysAgo.setDate(today.getDate() - 7)
 
     if (findDevice) {
@@ -326,7 +327,7 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
             device_id: findDevice.device_id,
             sortDate: {
                 $gte: new Date(sevenDaysAgo),
-                $lte: new Date(yesterday)
+                $lte: new Date(Startday)
             }
         }, function(err, data) {
             if (err) {
@@ -416,6 +417,41 @@ exports.dailySummary = asyncHandler(async(req, res) => {
 
 
 exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
+    //check if input are valid
+    if (!req.body.email || !req.body.arg || isNaN(req.body.arg.delayokay)) {
+        res.status(400).json({ error: 'Please add all Fields with valid values' })
+
+    } else {
+        // try tofind patient with given email
+        const findUser = await User.findOne({ email: req.body.email })
+        if (findUser) { //if found
+            //try to find the patient active device
+            const findDevice = await Device.findOne({ user_email: req.body.email, status: 'Active' })
+            if (findDevice) { //if found
+                const particle_token = findUser.particle_token
+                const deviceID = findDevice.device_id
+                    //make an API call to particle IO to update the valiable using axios
+                axios.post(`https://api.particle.io/v1/devices/${deviceID}/setBetweenUpdate`, {
+                    data: {
+                        arg: req.body.arg
+                    },
+                    headers: {
+                        'Authorization': `Bearer ${particle_token}`
+                    }
+
+                }).then(function(response) {
+
+                    res.status(200).json({ message: "Measurment Frequncy was updated" })
+                }).catch(err => { res.status(400).json({ error: 'something went wrong' }) })
+            } else {
+                res.status(400).json({ error: 'No active device found for this patient' })
+            }
+
+        } else {
+            res.status(400).json({ error: 'Patient not found' })
+
+        }
+    }
 
 })
 
