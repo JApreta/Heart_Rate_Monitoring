@@ -73,6 +73,12 @@
             </div>
             <!-- Tab panes -->
             <div class="col-md-12">
+                <div class="modal fade modalTransp" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <img src="/img/load.gif" alt="loading">
+                    </div>
+                </div>
+
                 <div class=" tab-content">
                     <!-- Tab panes -->
                     <div id="account" class="container tab-pane active show fade" role="tabpanel"><br>
@@ -146,7 +152,7 @@
                                             <span class="input-group-text" id="basic-addon1">Frequency</span>
                                             <input type="number" name="betweenMeas" id="betweenMeas" min="30" max="60" step="5" class="form-control" value="30" aria-label="email" aria-describedby="basic-addon1">
                                         </div>
-                                        <button type="submit" class="btn btn-primary form-control">Update</button>
+                                        <button type="submit" class="btn btn-primary form-control" id="updateMeasFreq">Update</button>
                                         <hr>
                                     </form>
                                 </div>

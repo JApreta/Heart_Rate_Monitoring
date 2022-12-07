@@ -87,7 +87,6 @@
              dataType: 'json'
          })
          .done(async function(data, textStatus, jqXHR) {
-
              if (jqXHR.status == 200) {
                  getPhysicianList() //get the list of available physicians
                  let myPhysician, physicianList = '<option selected disabled value="">Choose your Physician</option>'
@@ -102,7 +101,6 @@
                          myPhysician = physicians[i]
                  }
                  $('#physicianList').html(physicianList) //display the physician list
-
                  if (data.hasOwnProperty('physician_email')) { //if user has selected a physician-- show the selected physician info
                      $('#physicianInfo').html(`<h4>Current Physician</h4>
                                     <p class="card-text">name: ${myPhysician.firstName} ${myPhysician.lastName}</p>
@@ -123,7 +121,6 @@
 
  //this functions makes an api call to the server to
  async function getPhysicianList() {
-
      await $.ajax({
              async: false,
              url: '../../../api/patient/physician-list',
@@ -135,7 +132,6 @@
              dataType: 'json'
          })
          .done(function(data, textStatus, jqXHR) {
-
              if (jqXHR.status == 200) {
                  physicians = data
              } else {
@@ -143,9 +139,7 @@
              }
          })
          .fail(function(data, textStatus, jqXHR) {
-
              alert(JSON.stringify(data.responseJSON.error))
-
          });
 
  }
@@ -258,6 +252,8 @@
  //handles form submissin to update the measurment frequency
  $("#measurFreq").submit(function(event) {
      event.preventDefault();
+     $('#loadingModal').modal('show')
+     $('#updateMeasFreq').disabled = true // disable the submit btn to avoid multiple submission at once
      if ($('#betweenMeas').val() === "") { //check if an input was given
          window.alert("invalide Frequency value!");
          return;
@@ -277,13 +273,59 @@
              dataType: 'json'
          })
          .done(function(data, textStatus, jqXHR) {
+             $('#loadingModal').modal('hide')
+             $('#updateMeasFreq').disabled = false
              if (jqXHR.status == 200) { // check if update was done
                  alert(JSON.stringify(data.message)) // and show success message
+
              } else { // if failed 
                  alert(JSON.stringify(data.responseJSON.error)) //show error message
              }
          })
          .fail(function(data, textStatus, jqXHR) {
+             $('#loadingModal').modal('hide')
+             $('#updateMeasFreq').disabled = false
+             alert(JSON.stringify(data.responseJSON.error))
+         });
+ });
+
+ //handles form submissin to update the measurment Time
+ $("#measurTime").submit(function(event) {
+     event.preventDefault();
+     $('#updateMeasTime').disabled = true // disable the submit btn to avoit multiple submission at once
+     $('#loadingModal').modal('show')
+     if ($('#betweenMeas').val() === "") { //check if an input was given
+         window.alert("invalide Frequency value!");
+         return;
+     }
+     var userData = { //get the freq valeu and the user email to be updated
+         startTime: { "minute": $('#stTimem').val(), "hour": $('#stTimeh').val() },
+         endTime: { "minute": $('#enTimem').val(), "hour": $('#enTimeh').val() },
+
+     }
+     $.ajax({ // make an ajax call to server to update the freq
+             url: '../../../api/patient/measurment-time',
+             method: 'POST',
+             headers: {
+                 contentType: 'application/json',
+                 authorization: `Bearer ${localStorage.getItem("token")}` //user auth token
+             },
+             data: userData,
+             dataType: 'json'
+         })
+         .done(function(data, textStatus, jqXHR) {
+             $('#loadingModal').modal('hide')
+             $('#updateMeasTime').disabled = false
+             if (jqXHR.status == 200) { // check if update was done
+                 alert(JSON.stringify(data.message)) // and show success message
+
+             } else { // if failed 
+                 alert(JSON.stringify(data.responseJSON.error)) //show error message
+             }
+         })
+         .fail(function(data, textStatus, jqXHR) {
+             $('#loadingModal').modal('hide')
+             $('#updateMeasTime').disabled = false
              alert(JSON.stringify(data.responseJSON.error))
          });
  });
@@ -326,7 +368,6 @@
  //this function makes an api call to the srver to get the user's heart rate and O2 data 
  //from a selecetd day and displays the data on a line and bar graphs
  function getDailyReport(readingDate) {
-
      $.ajax({
              url: '../../../api/patient/daily-summary', //server endpoint to gat the graph data
              method: 'GET',
@@ -340,6 +381,7 @@
          .done(function(data, textStatus, jqXHR) {
              if (jqXHR.status == 200) {
                  //load heart rate line graph
+                 $('#reportDate').html(`Showing Report From ${ readingDate}`)
                  new Chart('rateGraph', {
                      type: 'line',
                      data: {

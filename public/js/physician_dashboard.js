@@ -128,7 +128,8 @@ $("#displayAllPatients").click(function(event) {
 // handles form submissin to update the measurment frequency
 $("measurFreq").submit(function(event) {
     event.preventDefault();
-
+    $('#loadingModal').modal('show') //show loading modal
+    $('#updateMeasFreq').disabled = true //disable submit btn to avoid multiple submissions at once
     if ($('#betweenMeas').val() === "") { //check if an input was given
         window.alert("invalid Frequency value!");
         return;
@@ -150,6 +151,8 @@ $("measurFreq").submit(function(event) {
             dataType: 'json'
         })
         .done(function(data, textStatus, jqXHR) {
+            $('#loadingModal').modal('hide')
+            $('#updateMeasFreq').disabled = false
             if (jqXHR.status == 200) { // check if update was done
                 alert(JSON.stringify(data.message)) // and show success message
 
@@ -158,6 +161,8 @@ $("measurFreq").submit(function(event) {
             }
         })
         .fail(function(data, textStatus, jqXHR) {
+            $('#loadingModal').modal('hide')
+            $('#updateMeasFreq').disabled = false
             alert(JSON.stringify(data.responseJSON.error))
         });
 });

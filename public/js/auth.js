@@ -1,8 +1,8 @@
  $("#signUpForm").submit(function(event) {
 
      event.preventDefault();
-
-     // data validation
+     $("#btnCreatePat").disabled = true
+         // data validation
      if ($('#firstName').val() === "") {
          window.alert("Invalid First Name!");
          return;
@@ -58,16 +58,23 @@
              dataType: 'json'
          })
          .done(function(data, textStatus, jqXHR) {
+             $("#btnCreatePat").disabled = false
+             $("#signUpForm").trigger("reset")
              if (jqXHR.status == 201) {
-                 alert(JSON.stringify(textStatus))
-                 console.log(JSON.stringify(data))
 
+                 alert(JSON.stringify(data.message))
+
+                 $(location).attr('href', '../login.html');
+
+             } else {
+                 alert(JSON.stringify(data.error))
              }
          })
          .fail(function(data, textStatus, jqXHR) {
-
+             $("#btnCreatePat").disabled = false
+             $("#signUpForm").trigger("reset")
              alert(JSON.stringify(data.responseJSON.error))
-             $(location).attr('href', '../patient/dashboard.html');
+
          });
 
  });

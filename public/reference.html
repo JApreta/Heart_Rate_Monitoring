@@ -12,6 +12,11 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <style>
+        .card {
+            border: 2px white solid;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,7 +29,6 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
                     <ul class="navbar-nav me-auto  mb-2 mb-lg-0 ">
                         <li class="nav-item">
                             <a class="nav-link" aria-current="page" href="#">Site Map</a>
@@ -46,69 +50,100 @@
                 </div>
             </div>
         </nav>
-        <div class="container-fluid">
 
+        <div class="container-fluid">
             <div class="row ">
-                <div class="col-md-3">
+                <div class="col-12">
+                    <h5> Aditional Resources </h5>
+                </div>
+                <hr>
+                <div class="col-md-3 mb-3">
                     <div class="card" style="width: 18rem;">
                         <img src="https://getbootstrap.com/docs/5.2/assets/brand/bootstrap-logo-shadow.png" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Bootstrap</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="https://getbootstrap.com/" class="btn btn-primary">Go</a>
+                            <p class="card-text">Used for responsive design</p>
+                            <a href="https://getbootstrap.com/" class="btn btn-primary" target="_blank">Go</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
                     <div class="card" style="width: 18rem;">
                         <img src="https://pbs.twimg.com/profile_images/1491038861224517637/s-H1KgWO_400x400.png" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">fontawesome</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="https://fontawesome.com/" class="btn btn-primary">Go</a>
+                            <p class="card-text">Used for icons</p>
+                            <a href="https://fontawesome.com/" class="btn btn-primary" target="_blank">Go</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card" style="width: 18rem;">
+                <div class="col-md-3 mb-3">
+                    <div class="card " style="width: 18rem;">
                         <img src="data:image/png;base64,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"
                             class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Particle.io</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="https://www.particle.io/" class="btn btn-primary">Go</a>
+                            <p class="card-text">Used for recording device rate/O2 readings and updating device measurement frequency and time </p>
+                            <a href="https://www.particle.io/" class="btn btn-primary" target="_blank">Go</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
                     <div class="card" style="width: 18rem;">
                         <img src="https://www.chartjs.org/docs/latest/favicon.ico" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">Chart.js</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="https://www.chartjs.org/docs/latest/" class="btn btn-primary">Go</a>
+                            <p class="card-text">Used for graphing user daily measurement data</p>
+                            <a href="https://www.chartjs.org/docs/latest/" class="btn btn-primary" target="_blank">Go</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
                     <div class="card" style="width: 18rem;">
                         <img src="https://axios-http.com/assets/logo.svg" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">AXIOS</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="https://axios-http.com/" class="btn btn-primary">Go</a>
+                            <p class="card-text">Used for making API calls on the server to updated device variable on particle.io</p>
+                            <a href="https://axios-http.com/" class="btn btn-primary" target="_blank">Go</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-3 mb-3">
                     <div class="card" style="width: 18rem;">
                         <img src="https://www.shutterstock.com/assets/images/shutterstock-logo-pos.svg" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">ShutterStock</h5>
-                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                            <a href="https://www.shutterstock.com/video/clip-23202442-heart-rate-monitoring-normal-cardiogram-beautiful-bright" class="btn btn-primary">Go</a>
+                            <p class="card-text">Used for landing page background video</p>
+                            <a href="https://www.shutterstock.com/video/clip-23202442-heart-rate-monitoring-normal-cardiogram-beautiful-bright" class="btn btn-primary" target="_blank">Go</a>
+                            <hr>
+                            <h5>LOADING.io</h5>
+                            <p class="card-text">Used for loading gif</p>
+                            <a href="https://loading.io/" class="btn btn-primary" target="_blank">Go</a>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card" style="width: 18rem;">
+                        <img src="https://brand.jquery.org/resources/jquery-mark-light.gif" class="card-img-top " alt="... ">
+                        <div class="card-body ">
+                            <h5 class="card-title ">JQuery</h5>
+                            <p class="card-text ">Used for DOM manipulation and API calls to the server</p>
+                            <a href="https://learn.jquery.com/" class="btn btn-primary" target="_blank">Go</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card" style="width: 18rem;">
+                        <img src="/img/code.png" class="card-img-top " alt="... ">
+                        <div class="card-body ">
+                            <h5 class="card-title ">GitHub initial Argon/MAX30105 Code </h5>
+                            <p class="card-text ">Used as Base to build the IoT Sofware</p>
+                            <a href="https://github.com/sparkfun/MAX30105_Particle_Sensor_Breakout" class="btn btn-primary" target="_blank">Go</a>
                         </div>
                     </div>
                 </div>
@@ -119,7 +154,7 @@
 
     </div>
     </div>
-    <script src="./js/index.js"></script>
+    <script src="./js/index.js "></script>
 </body>
 
 </html>

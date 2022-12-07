@@ -9,7 +9,7 @@ var dotenv = require('dotenv')
 const axios = require('axios')
 dotenv.config({ path: '../config/config.env' }) // load config file
 
-const secret = process.env.JWT
+const secret = process.env.JWT || "abchowiqgcq123"
 
 // create and save new phsician
 exports.create = asyncHandler(async(req, res) => {
@@ -20,41 +20,41 @@ exports.create = asyncHandler(async(req, res) => {
     if (!firstName || !lastName || !email || !password) {
         res.status(400).json({ error: 'Please add all Fields' })
             // throw new Error('Please add all Fields')
-    }
-    // look for user in the db
-    const findUser = await User.findOne({ email })
+    } else {
+        // look for user in the db
+        const findUser = await User.findOne({ email })
 
-    // if user already on db... trow an error
-    if (findUser) {
-        res.status(400).json({ error: 'User Already exist' })
-            // throw new Error('User Already exist')
-    }
-
-    // hashing the password
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-
-    const newPhysician = new User({
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        password: hashedPassword,
-        userType: "physician"
-
-    });
-    await newPhysician.save(function(err, data) {
-        if (err) {
-            res.status(400).send(err);
+        // if user already on db... trow an error
+        if (findUser) {
+            res.status(400).json({ error: 'User Already exist' })
+                // throw new Error('User Already exist')
         } else {
-            let msgStr = `physician with email(${data.email}) info has been save`;
-            res.status(201).json({
-                message: msgStr,
-                token: generateToken(data.email, data.userType)
+
+            // hashing the password
+            const salt = await bcrypt.genSalt(10)
+            const hashedPassword = await bcrypt.hash(password, salt)
+
+            const newPhysician = new User({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: hashedPassword,
+                userType: "physician"
+
             });
+            newPhysician.save(function(err, data) {
+                if (err) {
+                    res.status(400).json({ error: 'Something went wrong...' })
+                } else {
+                    let msgStr = `physician with email(${data.email}) info has been save`;
+                    res.status(201).json({
+                        message: msgStr,
+                        token: generateToken(data.email, data.userType)
+                    });
+                }
+            })
         }
-    })
-
-
+    }
 })
 
 // physicianlogin
@@ -251,15 +251,12 @@ exports.updateUserInfo = asyncHandler(async(req, res) => {
     const update = { firstName: req.body.firstName, lastName: req.body.lastName } //get the user new full name
     if (!req.body.firstName || !req.body.lastName) {
         res.status(400).json({ error: 'Please add all Fields' })
-
     } else {
         User.findOneAndUpdate(filter, update, function(err, data) { //find and update the patient info
             if (err) {
-
                 res.status(400).json({ message: "Bad Request" })
             } else {
                 res.status(200).json({ message: "User Information updated successfully!" });
-
             }
         })
     }

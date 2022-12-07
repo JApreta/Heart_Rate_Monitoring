@@ -1,6 +1,7 @@
     $("#signUpForm").submit(function(event) {
 
         event.preventDefault();
+        $("#btnCreatePhy").disabled = true
 
         // data validation
         if ($('#firstName').val() === "") {
@@ -56,18 +57,22 @@
                 dataType: 'json'
             })
             .done(function(data, textStatus, jqXHR) {
+                $("#signUpForm").trigger("reset")
+                $("#btnCreatePhy").disabled = false
                 if (jqXHR.status == 201) {
 
-                    console.log(JSON.stringify(data))
-                    localStorage.setItem("token",
-                        tokenResponse.token);
+                    alert(JSON.stringify(data.message))
 
+                    $(location).attr('href', '../login.html')
+                } else {
+                    alert(JSON.stringify(data.error))
                 }
             })
             .fail(function(data, textStatus, jqXHR) {
-
+                $("#signUpForm").trigger("reset")
+                $("#btnCreatePhy").disabled = false
                 alert(JSON.stringify(data.responseJSON.error))
-                    // $(location).attr('href', '../physician/dashboard.html');
+
             });
 
     });

@@ -65,7 +65,7 @@ exports.create = asyncHandler(async(req, res) => {
         //if deviceID and token are valid
     if (validate_device && validate_token) {
 
-        const newPatient = new User({
+        const newPatient = new User({ //cretaes a new patient obj
             firstName: firstName,
             lastName: lastName,
             email: email,
@@ -438,8 +438,43 @@ exports.updateMeasurmentFreq = asyncHandler(async(req, res) => {
 
         }
     }
-
 })
+
+//this function updates the device measurment freq on particle.io
+exports.updateMeasurmentTime = asyncHandler(async(req, res) => {
+    //check if input are valid
+    if (!req.body.startTime || !req.body.endTime) {
+        res.status(400).json({ error: 'Please add all Fields with valid values...' })
+
+    } else {
+        // try tofind patient with given email
+        const findUser = await User.findOne({ email: req.user.email })
+        if (findUser) { //if found
+            //try to find the patient active device
+            const findDevice = await Device.findOne({ user_email: req.user.email, status: 'Active' })
+            if (findDevice) { //if found
+                const particle_token = findUser.particle_token //get the user particle.io token
+                const deviceID = findDevice.device_id // get the user active device ID
+                    //make an API call to particle IO to update the valiable using axios
+                axios.post(`https://api.particle.io/v1/devices/${deviceID}/setStartUpdate`, { arg: req.body.startTime }, { headers: { 'Authorization': `Bearer ${particle_token}` } }
+
+                ).then(function(response) {
+                    //axios api call for end time
+                    axios.post(`https://api.particle.io/v1/devices/${deviceID}/setEndUpdate`, { arg: req.body.endTime }, { headers: { 'Authorization': `Bearer ${particle_token}` } }).then(function(response) {
+                        res.status(200).json({ message: "Measurment Time was updated" })
+                    }).catch(err => { res.status(400).json({ error: 'something went wrong...' }) })
+                }).catch(err => { res.status(400).json({ error: 'something went wrong...' }) })
+            } else {
+                res.status(400).json({ error: 'No active device found for this patient' })
+            }
+
+        } else {
+            res.status(400).json({ error: 'Patient not found' })
+
+        }
+    }
+})
+
 
 //this function uses jwt to generate the user auth token given the email
 const generateToken = (email) => {

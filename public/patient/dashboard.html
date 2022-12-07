@@ -23,7 +23,7 @@
             location.replace("../physician/dashboard.html");
         }
     </script>
-    <title>Document</title>
+    <title>HRM Patient Portal</title>
 </head>
 
 <body>
@@ -70,11 +70,17 @@
                         <a id="patientWReport" class="nav-link" data-bs-toggle="tab" role="tab" href="#weeklyview">Weekly Report</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" data-bs-toggle="tab" role="tab" href="#measuermentSet">Measurment Settings</a>
+                        <a class="nav-link" data-bs-toggle="tab" role="tab" href="#measuermentSet">Measurement Settings</a>
                     </li>
                 </ul>
             </div>
             <div class="col-md-12">
+                <div class="modal fade modalTransp" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <img src="/img/load.gif" alt="loading">
+                    </div>
+                </div>
+
 
                 <!-- Tab panes -->
                 <div class="tab-content">
@@ -160,9 +166,12 @@
                                         <input type="date" class="form-control" id="readingDate" name="readingDate" value="" min="2010-01-01">
                                         <hr>
                                     </div>
+                                    <h5 id="reportDate"></h5>
                                 </div>
                             </div>
                         </div>
+
+                        <hr>
                         <canvas id="rateGraph" height="90"></canvas>
                         <canvas id="rateBarGraph" height="90"></canvas>
                         <canvas id="oxyGraph" height="90"></canvas>
@@ -208,7 +217,7 @@
                                         <span class="input-group-text" id="basic-addon1">Frequency in Minutes</span>
                                         <input type="number" name="betweenMeas" id="betweenMeas" min="30" max="60" step="5" class="form-control" value="30" aria-label="email" aria-describedby="basic-addon1">
                                     </div>
-                                    <button type="submit" class="btn btn-primary form-control">Update</button>
+                                    <button type="submit" class="btn btn-primary form-control" id="updateMeasFreq">Update</button>
                                     <hr>
                                 </form>
                             </div>
@@ -219,7 +228,7 @@
                                     <hr>
                                     <div class="input-group mb-3">
                                         <span class="input-group-text" id="basic-addon1">Start Hour</span>
-                                        <input type="number" name="stTimeh" id="stTimeh" min="6" max="22" step="1" class="form-control" value="6" aria-label="email" aria-describedby="basic-addon1">
+                                        <input type="number" name="stTimeh" id="stTimeh" min="0" max="23" step="1" class="form-control" value="6" aria-label="email" aria-describedby="basic-addon1">
                                     </div>
                                     <div class="input-group mb-3">
                                         <span class="input-group-text" id="basic-addon1">Start Minute</span>
@@ -227,13 +236,13 @@
                                     </div>
                                     <div class="input-group mb-3">
                                         <span class="input-group-text" id="basic-addon1">End Hour</span>
-                                        <input type="number" name="enTimeh" id="enTimeh" min="7" max="22" step="5" class="form-control" value="22" aria-label="email" aria-describedby="basic-addon1">
+                                        <input type="number" name="enTimeh" id="enTimeh" min="1" max="23" step="1" class="form-control" value="22" aria-label="email" aria-describedby="basic-addon1">
                                     </div>
                                     <div class="input-group mb-3">
                                         <span class="input-group-text" id="basic-addon1">End Minute</span>
                                         <input type="number" name="enTimem" id="enTimem" min="0" max="60" step="5" class="form-control" value="0" aria-label="email" aria-describedby="basic-addon1">
                                     </div>
-                                    <button type="submit" class="btn btn-primary form-control">Update</button>
+                                    <button type="submit" class="btn btn-primary form-control" id="updateMeasTime">Update</button>
                                 </form>
                             </div>
                         </div>
