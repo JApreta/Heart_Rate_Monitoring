@@ -197,12 +197,14 @@
              .done(function(data, textStatus, jqXHR) {
                  if (jqXHR.status == 200) { //if the device was added
                      alert(JSON.stringify(data.message)) //show success message
+                     $("#newdeviceForm").trigger("reset")
                      getDeviceList() //load the device list to show updated info
                  } else { //if there is an error for some reason-- show the error message
                      alert(JSON.stringify(data.responseJSON.error))
                  }
              })
              .fail(function(data, textStatus, jqXHR) {
+                 $("#newdeviceForm").trigger("reset")
                  alert(JSON.stringify(data.responseJSON.error))
              });
      }

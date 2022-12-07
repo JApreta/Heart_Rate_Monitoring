@@ -227,7 +227,7 @@ $("#choosePatientDetail").submit(function(event) {
         .done(function(data, textStatus, jqXHR) {
             if (jqXHR.status == 200) {
 
-                $("#patientDetailHeader").text(`Patient ${data.name} Detail`)
+                $("#patientDetailHeader").text(`Patient ${data.name} Detail on ${selectedDate}`)
                 new Chart('rateGraph', {
                     type: 'line',
                     data: {

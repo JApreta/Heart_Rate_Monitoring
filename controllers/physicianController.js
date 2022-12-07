@@ -149,8 +149,11 @@ exports.weeklySummary = asyncHandler(async(req, res) => {
                     avg = avg / data.length
                     let patientName = patient.firstName + " " + patient.lastName;
                     res.status(200).json({ device: findDevice.device_id, avg: avg, min: min, max: max, name: patientName })
-                } else
-                    res.status(400).json({ error: "NO READINGS HAVE BEEN RECORDED" });
+                } else {
+                    let patientName = patient.firstName + " " + patient.lastName;
+                    res.status(200).json({ device: findDevice.device_id, avg: 0, min: 0, max: 0, name: patientName })
+                }
+
             }
         })
     } else

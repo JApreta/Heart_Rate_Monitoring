@@ -12,6 +12,16 @@
     <link href="../css/style.css" rel="stylesheet" type="text/css" />
 
     <link href="style.css" rel="stylesheet" type="text/css" />
+    <script async>
+        var token = localStorage.getItem("token");
+        var userType = localStorage.getItem("userType");
+        if (!(token == null) && (userType == "patient")) {
+            location.replace("../patient/dashboard.html");
+        }
+        if (!(token == null) && !(userType == "patient")) {
+            location.replace("../physician/dashboard.html");
+        }
+    </script>
 </head>
 
 <body>

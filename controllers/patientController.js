@@ -22,90 +22,91 @@ exports.create = asyncHandler(async(req, res) => {
     if (!firstName || !lastName || !email || !password || !device_id || !particle_token) {
         res.status(400).json({ error: 'Please add all Fields' })
             //throw new Error('Please add all Fields')
-    }
-    //look for user and device in the db
-    const findUser = await User.findOne({ email })
-    const findDevice = await Device.findOne({ device_id })
+    } else {
+        //look for user and device in the db
+        const findUser = await User.findOne({ email })
+        const findDevice = await Device.findOne({ device_id })
 
-    //if user already on db... trow an error
-    if (findUser) {
-        res.status(400).json({ error: 'User Already exist' })
-            //throw new Error('User Already exist')
-    }
+        //if user already on db... trow an error
+        if (findUser) {
+            res.status(400).json({ error: 'User Already exist' })
+                //throw new Error('User Already exist')
+        } else {
 
-    //if device already claimed... trow an error
-    if (findDevice) {
-        res.status(400).json({ error: 'Device was claimed by another user' })
-            // throw new Error('Device was claimed by another user')
-    }
-
-    //hashing the password
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-
-    //api call to particle.io to check if given token and/or device_id is valid
-    var validate_device = false
-    var validate_token = false
-    const particle = new Particle()
-    await particle.listDevices({ auth: particle_token }).then(
-            function(devices) {
-                validate_token = true
-                for (let dev of devices.body) {
-                    if (dev.id == device_id) {
-                        validate_device = true
-                        break
-                    }
-                }
-            },
-            function(err) {
-                validate_device = false
-                validate_token = false
-            }
-        )
-        //if deviceID and token are valid
-    if (validate_device && validate_token) {
-
-        const newPatient = new User({ //cretaes a new patient obj
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            password: hashedPassword,
-            particle_token: particle_token,
-            userType: "patient",
-            physician_emai: ""
-
-        });
-        newPatient.save(function(err, data) {
-            if (err) {
-                res.status(400).send(err);
+            //if device already claimed... trow an error
+            if (findDevice) {
+                res.status(400).json({ error: 'Device was claimed by another user' })
+                    // throw new Error('Device was claimed by another user')
             } else {
-                //save user's first device
-                const userDevice = new Device({
-                    device_id: device_id,
-                    user_email: email,
-                    device_apiKey: generateApiKey({ //generates the API key for the device 
-                        method: 'string',
-                        pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                //hashing the password
+                const salt = await bcrypt.genSalt(10)
+                const hashedPassword = await bcrypt.hash(password, salt)
+
+                //api call to particle.io to check if given token and/or device_id is valid
+                var validate_device = false
+                var validate_token = false
+                const particle = new Particle()
+                await particle.listDevices({ auth: particle_token }).then(
+                        function(devices) {
+                            validate_token = true
+                            for (let dev of devices.body) {
+                                if (dev.id == device_id) {
+                                    validate_device = true
+                                    break
+                                }
+                            }
+                        },
+                        function(err) {
+                            validate_device = false
+                            validate_token = false
+                        }
+                    )
+                    //if deviceID and token are valid
+                if (validate_device && validate_token) {
+
+                    const newPatient = new User({ //cretaes a new patient obj
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        password: hashedPassword,
+                        particle_token: particle_token,
+                        userType: "patient",
+                        physician_emai: ""
+
+                    });
+                    newPatient.save(function(err, data) {
+                        if (err) {
+                            res.status(400).json({ error: 'Something went wrong...' })
+                        } else {
+                            //save user's first device
+                            const userDevice = new Device({
+                                device_id: device_id,
+                                user_email: email,
+                                device_apiKey: generateApiKey({ //generates the API key for the device 
+                                    method: 'string',
+                                    pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+                                })
+
+                            });
+                            userDevice.save(function(err, device) { // save the device on db
+                                if (err) {
+                                    res.status(400).json({ error: 'Something went wrong...' })
+                                } else {
+                                    let msgStr = `patient with email(${data.email}) info has been save`;
+                                    res.status(201).send({
+                                        message: msgStr,
+                                        token: generateToken(data.email)
+                                    });
+                                }
+                            })
+                        }
                     })
 
-                });
-                userDevice.save(function(err, device) { // save the device on db
-                    if (err) {
-                        res.status(400).send(err);
-                    } else {
-                        let msgStr = `patient with email(${data.email}) info has been save`;
-                        res.status(201).send({
-                            message: msgStr,
-                            token: generateToken(data.email)
-                        });
-                    }
-                })
+                } else
+                    res.status(400).send({ error: " invalid Device ID and or Particle Token" })
             }
-        })
-
-    } else
-        res.status(400).send({ error: " invalid Device ID and or Particle Token" })
-
+        }
+    }
 })
 
 //patient login
@@ -162,25 +163,25 @@ exports.deviceList = asyncHandler(async(req, res) => {
 exports.addDevice = asyncHandler(async(req, res) => {
     const device_id = req.body.device_id // get the given device ID
     var val = false
-    const particle = new Particle()
-        //make an API call to check if the given device ID is valid and claimed by the user on particle.io
-    await particle.listDevices({ auth: req.user.particle_token }).then(
-        function(devices) {
-            for (let dev of devices.body) {
-                if (dev.id == device_id) {
-                    val = true
-                    break
+    const findDevice = await Device.findOne({ device_id }) //check if it has been claimed by another user
+    if (findDevice) {
+        res.status(400).json({ error: 'Device was claimed by another user' })
+            //throw new Error('Device was claimed by another user')
+    } else {
+        const particle = new Particle()
+            //make an API call to check if the given device ID is valid and claimed by the user on particle.io
+        await particle.listDevices({ auth: req.user.particle_token }).then(
+            function(devices) {
+                for (let dev of devices.body) {
+                    if (dev.id == device_id) {
+                        val = true
+                        break
+                    }
                 }
-            }
-        },
-        function(err) { val = false })
+            },
+            function(err) { val = false })
 
-    if (val) { //if given device Id is valid
-        const findDevice = await Device.findOne({ device_id }) //check if it has been claimed by another user
-        if (findDevice) {
-            res.status(400).json({ error: 'Device was claimed by another user' })
-                //throw new Error('Device was claimed by another user')
-        } else {
+        if (val) { //if given device Id is valid
             const userDevice = new Device({ //create a new device obj with the given data
                 device_id: device_id,
                 user_email: req.user.email,
@@ -197,9 +198,10 @@ exports.addDevice = asyncHandler(async(req, res) => {
                     res.status(200).json({ message: `Device with id( ${device.device_id}) info has been save` });
                 }
             })
+
+        } else {
+            res.status(400).send({ error: " Invalid Device ID" })
         }
-    } else {
-        res.status(400).send({ error: " Invalid Device ID" })
     }
 })
 
