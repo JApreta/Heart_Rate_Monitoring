@@ -261,7 +261,7 @@
          return;
      }
      var userData = { //get the freq valeu and the user email to be updated
-         arg: { "delayokay": $('#betweenMeas').val() },
+         arg: JSON.stringify({ delayokay: $('#betweenMeas').val() }),
          email: localStorage.getItem("userEmail")
      }
      $.ajax({ // make an ajax call to server to update the freq
@@ -301,8 +301,8 @@
          return;
      }
      var userData = { //get the freq valeu and the user email to be updated
-         startTime: { "minute": $('#stTimem').val(), "hour": $('#stTimeh').val() },
-         endTime: { "minute": $('#enTimem').val(), "hour": $('#enTimeh').val() },
+         startTime: JSON.stringify({ "minute": $('#stTimem').val(), "hour": $('#stTimeh').val() }),
+         endTime: JSON.stringify({ "minute": $('#enTimem').val(), "hour": $('#enTimeh').val() }),
 
      }
      $.ajax({ // make an ajax call to server to update the freq

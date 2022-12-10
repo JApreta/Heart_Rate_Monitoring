@@ -190,7 +190,7 @@ exports.addDevice = asyncHandler(async(req, res) => {
                     pool: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
                 })
             });
-            await Device.updateMany({ user_email: { $eq: req.user.email } }, { status: "Deactive" }) //set all the prev saved device status to deactive
+            await Device.updateMany({ user_email: { $eq: req.user.email } }, { status: "Disabled" }) //set all the prev saved device status to deactive
             userDevice.save(function(err, device) { //save the new device
                 if (err) {
                     res.status(400).json({ error: 'Bad Request' });
@@ -298,11 +298,11 @@ exports.saveReading = asyncHandler(async(req, res) => {
 
                 newReading.save(function(err, device) { //save the reading data on the db
                     if (err) {
-                        console.log(req.body) // Call your action on the request here
+                        // console.log(req.body) // Call your action on the request here
                         res.status(400).end() // Responding is important
                     } else {
 
-                        console.log(req.body) // Call your action on the request here
+                        // console.log(req.body) // Call your action on the request here
                         res.status(200).json({ message: "Reading has been recorded" });
                     }
                 })

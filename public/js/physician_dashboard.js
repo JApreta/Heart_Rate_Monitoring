@@ -126,7 +126,7 @@ $("#displayAllPatients").click(function(event) {
 });
 
 // handles form submissin to update the measurment frequency
-$("measurFreq").submit(function(event) {
+$("#measurFreq").submit(function(event) {
     event.preventDefault();
     $('#loadingModal').modal('show') //show loading modal
     $('#updateMeasFreq').disabled = true //disable submit btn to avoid multiple submissions at once
@@ -136,7 +136,7 @@ $("measurFreq").submit(function(event) {
     }
 
     var userData = { //get the freq value and the user email to be updated
-        arg: { "delayokay": $('#betweenMeas').val() },
+        arg: JSON.stringify({ "delayokay": $('#betweenMeas').val() }),
         email: $("#getPatientSummary").find(":selected").val()
     }
 
